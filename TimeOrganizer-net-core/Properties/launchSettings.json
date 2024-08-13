@@ -1,0 +1,71 @@
+﻿{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:40725",
+      "sslPort": 44394
+    }
+  },
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "http://localhost:5104",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "LOGGING_LEVEL":"Information",
+        "PORT":"8080",
+        
+        "MAIL_SMTP_SERVER":"smtp.example.com",
+        "MAIL_SMTP_PORT":"587",
+        "MAIL_SMTP_USERNAME":"username",
+        "MAIL_SMTP_PASSWORD":"password",
+        "MAIL_ENABLE_SSL":"true",
+        "MAIL_TRUST_SERVER_CERTIFICATE":"true",
+        
+        "OAUTH2_GOOGLE_CLIENT_ID":"your-client-id",
+        "OAUTH2_GOOGLE_CLIENT_SECRET":"your-client-secret",
+        "OAUTH2_GOOGLE_REDIRECT_URI":"http://localhost:5000/signin-google",        
+        
+        "DB_DDL_TYPE":"Create",
+        "POSTGRES_USER":"jakub",
+        "POSTGRES_PASSWORD":"u9TwA2dUjhQS9sw%",
+        "DB_NAME":"asp_net_test",
+        "DB_HOST":"srv544364.hstgr.cloud"
+      }
+    },
+    "https": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7172;http://localhost:5104",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "LOGGING_LEVEL":"Information",
+        "PORT":"8080",
+
+        "MAIL_SMTP_SERVER":"smtp.example.com",
+        "MAIL_SMTP_PORT":"587",
+        "MAIL_SMTP_USERNAME":"username",
+        "MAIL_SMTP_PASSWORD":"password",
+        "MAIL_ENABLE_SSL":"true",
+        "MAIL_TRUST_SERVER_CERTIFICATE":"true",
+
+        "OAUTH2_GOOGLE_CLIENT_ID":"your-client-id",
+        "OAUTH2_GOOGLE_CLIENT_SECRET":"your-client-secret",
+        "OAUTH2_GOOGLE_REDIRECT_URI":"http://localhost:5000/signin-google",
+
+        "DB_DDL_TYPE":"Create",
+        "POSTGRES_USER":"jakub",
+        "POSTGRES_PASSWORD":"u9TwA2dUjhQS9sw%",
+        "DB_NAME":"ASP_NET_test",
+        "DB_HOST":"srv544364.hstgr.cloud"
+      }
+    }    
+  }
+}
