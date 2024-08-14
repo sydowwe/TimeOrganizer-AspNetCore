@@ -19,6 +19,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "LOGGING_LEVEL":"Information",
         "PORT":"8080",
+        "APP_NAME": "TimeOrganizer",
+        "PEM_PASSWORD": "12345",
         
         "MAIL_SMTP_SERVER":"smtp.example.com",
         "MAIL_SMTP_PORT":"587",
@@ -29,7 +31,9 @@
         
         "OAUTH2_GOOGLE_CLIENT_ID":"your-client-id",
         "OAUTH2_GOOGLE_CLIENT_SECRET":"your-client-secret",
-        "OAUTH2_GOOGLE_REDIRECT_URI":"http://localhost:5000/signin-google",        
+        "OAUTH2_GOOGLE_REDIRECT_URI":"http://localhost:5000/signin-google",
+
+        "TOKEN_BLACKLIST_CLEANUP_PERIOD_IN_SEC": "3600",
         
         "DB_DDL_TYPE":"Create",
         "POSTGRES_USER":"jakub",

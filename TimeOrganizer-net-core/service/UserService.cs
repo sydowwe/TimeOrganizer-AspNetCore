@@ -1,9 +1,7 @@
 using System.Security.Authentication;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.identity;
 using Microsoft.AspNetCore.Identity;
 using TimeOrganizer_net_core.exception;
 using TimeOrganizer_net_core.model.DTO.request.user;
@@ -23,21 +21,21 @@ public class UserService(
     IPasswordHasher<User> passwordHasher,
     IAuthenticationService authenticationService,
     IJwtService jwtService,
-    IGoogleAuthenticator googleAuthenticator,
-    IEmailService emailService,
+    IGoogleRecaptchaService googleRecaptchaService,
+    ITOTPService totpService,
+    // IEmailService emailService,
     ITaskUrgencyService taskUrgencyService,
     IRoutineTimePeriodService routineTimePeriodService,
     IRoleService roleService,
-    IGoogleService googleService,
     IMapper mapper,
     IConfiguration configuration) : IUserService
 {
 
     public async Task<RegistrationResponse> registerUserAsync(RegistrationRequest registration)
     {
-        if (!await googleService.VerifyRecaptchaAsync(registration.recaptchaToken, "register"))
+        if (!await googleRecaptchaService.verifyRecaptchaAsync(registration.recaptchaToken, "register"))
         {
-            throw new ReCaptchaException();
+            throw new ReCaptchaException("Wrong captcha token or action");
         }
 
         var newUser = new User
@@ -50,15 +48,12 @@ public class UserService(
             currentLocale = registration.currentLocale,
             timezone = registration.timezone
         };
-
         RegistrationResponse response;
-
         if (registration.has2FA)
         {
-            var credentials = googleAuthenticator.CreateCredentials();
-            newUser.secretKey2FA = credentials.Key;
-            newUser.scratchCodes = credentials.scratchCodes;
-            var qrCode = Generate2FaQrCode(newUser.email, credentials);
+            newUser.secretKey2FA = totpService.generateSecretKey();
+            newUser.scratchCodes = null;
+            var qrCode =  totpService.generateQrCode(newUser.secretKey2FA, newUser.email);
             response = new RegistrationResponse
             {
                 email = newUser.email,
@@ -78,7 +73,7 @@ public class UserService(
         try
         {
             await userRepository.addAsync(newUser);
-            await SetDefaultSettingsAsync(newUser);
+            await setDefaultSettingsAsync(newUser.id);
         }
         catch (Exception ex)
         {
@@ -90,13 +85,13 @@ public class UserService(
 
     public async Task<LoginResponse> loginUserAsync(LoginRequest loginRequest)
     {
-        if (!await googleService.VerifyRecaptchaAsync(loginRequest.recaptchaToken, "login"))
+        if (!await googleRecaptchaService.verifyRecaptchaAsync(loginRequest.recaptchaToken, "login"))
         {
-            throw new ReCaptchaException("wrong captcha");
+            throw new ReCaptchaException("Wrong captcha token or action");
         }
 
 
-        var user = await findByEmailAsync(loginRequest.email);
+        var user = await getByEmailAsync(loginRequest.email);
         if (user == null)
         {
             throw new UserNotFoundException(loginRequest.email);
@@ -112,17 +107,17 @@ public class UserService(
         }
 
 
-        if (user.StayLoggedIn != loginRequest.stayLoggedIn)
+        if (user.isStayLoggedIn != loginRequest.stayLoggedIn)
         {
             await userRepository.updateStayLoggedInByIdAsync(user.id, loginRequest.stayLoggedIn);
         }
 
-        if (user.Timezone != loginRequest.timezone)
+        if (!user.timezone.Equals(loginRequest.timezone))
         {
             await userRepository.updateUserTimezoneAsync(user.id, loginRequest.timezone);
         }
 
-        if (user.has2FA)
+        if (user.has2FA())
         {
             return new LoginResponse
             {
@@ -134,7 +129,7 @@ public class UserService(
         }
         else
         {
-            var jwtToken = jwtService.GenerateToken(user.email, user.id, GetTokenExpirationLength(loginRequest.stayLoggedIn));
+            var jwtToken = jwtService.generateToken(user.email, user.id, getTokenExpirationLength(loginRequest.stayLoggedIn));
             return new LoginResponse
             {
                 id = user.id,
@@ -188,19 +183,19 @@ public class UserService(
 
     
 
-    public async Task<GoogleAuthResponse> Validate2FALoginAsync(GoogleAuthLoginRequest request)
+    public async Task<GoogleAuthResponse> validate2FALoginAsync(GoogleAuthLoginRequest request)
     {
-        var user = await FindByemailAsync(request.email);
+        var user = await getByEmailAsync(request.email);
         if (user == null)
         {
             throw new NotFoundException($"User with email: {request.email} not found");
         }
 
-        var is2FAValid = googleAuthenticator.Authorize(user.secretKey2FA, int.Parse(request.code));
+        var is2FAValid = totpService.validateTotp(user.secretKey2FA, request.code);
         var response = new GoogleAuthResponse
         {
             authorized = is2FAValid,
-            token = is2FAValid ? jwtService.GenerateToken(user.email, user.id, GetTokenExpirationLength(user.isStayLoggedIn)) : null
+            token = is2FAValid ? jwtService.GenerateToken(user.email, user.id, getTokenExpirationLength(user.isStayLoggedIn)) : null
         };
 
         if (is2FAValid)
@@ -213,20 +208,20 @@ public class UserService(
         return response;
     }
 
-    public void Logout(string token)
+    public void logout(string token)
     {
-        jwtService.InvalidateToken(token);
+        jwtService.invalidateToken(token);
     }
 
-    public async Task ChangecurrentLocaleAsync(AvailableLocales locale)
+    public async Task changeCurrentLocaleAsync(AvailableLocales locale)
     {
         var loggedUserId = GetLoggedUserId();
         await userRepository.updateCurrentLocaleByIdAsync(loggedUserId, locale);
     }
 
-    public async Task ResetPasswordAsync(string email)
+    public async Task resetPasswordAsync(string email)
     {
-        var tempPassword = GenerateTemporaryPassword();
+        var tempPassword = generateTemporaryPassword();
         var updated = await userRepository.updatePasswordByEmailAsync(email, passwordHasher.HashPassword(null, tempPassword));
         if (updated<1)
         {
@@ -236,13 +231,13 @@ public class UserService(
         await emailService.SendemailAsync(email, $"Password reset - {configuration["App:Name"]}", emailBody);
     }
 
-    public async Task<bool> WereSensitiveChangesMadeAsync(UserRequest changedUser)
+    public async Task<bool> wereSensitiveChangesMadeAsync(UserRequest changedUser)
     {
         var loggedUser = await GetLoggedUserAsync();
         return !(loggedUser.email.Equals(changedUser.email) && loggedUser.has2FA == changedUser.has2FA);
     }
 
-    public async Task<bool> VerifyPasswordAndReturn2FAStatusAsync(string token, string password)
+    public async Task<bool> verifyPasswordAndReturn2FAStatusAsync(string token, string password)
     {
         var loggedUser = await GetLoggedUserAsync(token);
         var result = await authenticationService.AuthenticateAsync(
@@ -257,36 +252,35 @@ public class UserService(
         return loggedUser.has2FA;
     }
 
-    public async Task<bool> Validate2FAAsync(string token, int code)
+    public async Task<bool> validate2FAAsync(string token, int code)
     {
         var loggedUser = await GetLoggedUserAsync(token);
         return googleAuthenticator.Authorize(loggedUser.secretKey2FA, code);
     }
 
-    public async Task<UserResponse> GetLoggedUserDataAsync()
+    public async Task<UserResponse> getLoggedUserDataAsync()
     {
         var loggedUser = await GetLoggedUserAsync();
         return mapper.Map<UserResponse>(loggedUser);
     }
 
-    public async Task<EditedUserResponse> EditLoggedUserDataAsync(string token, UserRequest request)
+    public async Task<EditedUserResponse> editLoggedUserDataAsync(string token, UserRequest request)
     {
         var loggedUser = await GetLoggedUserAsync(token);
-        string newToken = null;
-        byte[] qrCode = null;
+        string newToken;
+        byte[] qrCode;
 
         if (!loggedUser.email.Equals(request.email))
         {
-            jwtService.InvalidateToken(token);
-            newToken = jwtService.GenerateToken(request.email, loggedUser.id, GetTokenExpirationLength(loggedUser.isStayLoggedIn));
+            jwtService.invalidateToken(token);
+            newToken = jwtService.generateToken(request.email, loggedUser.id, getTokenExpirationLength(loggedUser.isStayLoggedIn));
         }
 
         if (!loggedUser.has2FA() && request.has2FA)
         {
-            var credentials = googleAuthenticator.CreateCredentials();
-            loggedUser.secretKey2FA = credentials.Key;
-            loggedUser.scratchCodes = credentials.scratchCodes;
-            qrCode = generate2FaQrCode(loggedUser.email, credentials);
+            loggedUser.secretKey2FA = totpService.generateSecretKey();
+            loggedUser.scratchCodes = null;
+            qrCode = totpService.generateQrCode(loggedUser.secretKey2FA, loggedUser.email);
         }
 
         mapper.Map(loggedUser, request);
@@ -295,94 +289,76 @@ public class UserService(
         return userMapper.ConvertToEditedUserSettingsResponse(loggedUser, newToken, qrCode);
     }
 
-    public async Task ChangeLoggedUserPasswordAsync(string token, string newPassword)
+    public async Task changeLoggedUserPasswordAsync(string token, string newPassword)
     {
         var loggedUser = await GetLoggedUserAsync(token);
         loggedUser.passwordHash = passwordHasher.HashPassword(null, newPassword);
         await userRepository.SaveAsync(loggedUser);
     }
 
-    public async Task DeleteLoggedUserAccountAsync(string token)
+    public async Task deleteLoggedUserAccountAsync(string token)
     {
-        var userId = jwtService.ExtractId(token);
+        var userId = jwtService.extractId(token);
         await userRepository.deleteAsync(userId);
     }
 
-    public async Task<byte[]> Get2FAQrCodeAsync(string token)
+    public async Task<byte[]> get2FAQrCodeAsync(string token)
     {
         var loggedUser = await GetLoggedUserAsync(token);
-        var credentials = new GoogleAuthenticatorKey(loggedUser.secretKey2FA, loggedUser.ScratchCodes);
-        return Generate2FaQrCode(loggedUser.email, credentials);
+        return totpService.generateQrCode(loggedUser.email, loggedUser.secretKey2FA);
     }
 
-    public async Task<int> Get2FAScratchCodeAsync(string token)
-    {
-        var loggedUser = await GetLoggedUserAsync(token);
-        int scratchCode;
-        try
-        {
-            var scratchCodes = loggedUser.scratchCodes;
-            scratchCode = scratchCodes.Dequeue();
-            loggedUser.scratchCodes = scratchCodes;
-        }
-        catch (InvalidOperationException)
-        {
-            var credentials = googleAuthenticator.CreateCredentials();
-            loggedUser.secretKey2FA = credentials.Key;
-            loggedUser.scratchCodes = credentials.scratchCodes;
-            scratchCode = -1; // Indicates a new QR code is needed
-        }
+    // public async Task<int> Get2FAScratchCodeAsync(string token)
+    // {
+    //     var loggedUser = await GetLoggedUserAsync(token);
+    //     int scratchCode;
+    //     try
+    //     {
+    //         var scratchCodes = loggedUser.scratchCodes;
+    //         scratchCode = scratchCodes.Dequeue();
+    //         loggedUser.scratchCodes = scratchCodes;
+    //     }
+    //     catch (InvalidOperationException)
+    //     {
+    //         loggedUser.secretKey2FA = totpService.generateSecretKey();
+    //     }
+    //
+    //     await userRepository.SaveAsync(loggedUser);
+    //     return scratchCode;
+    // }
+ 
 
-        await userRepository.SaveAsync(loggedUser);
-        return scratchCode;
-    }
-
-    // Helper methods
-    private async Task<User> GetLoggedUserAsync(string token = null)
-    {
-        if (token == null)
-        {
-            var userId = GetLoggedUserId();
-            return await FindByIdAsync(userId);
-        }
-        else
-        {
-            var userId = jwtService.ExtractId(token);
-            return await FindByIdAsync(userId);
-        }
-    }
-
-    private async Task<User> FindByIdAsync(long id)
+    private async Task<User> getByIdAsync(long id)
     {
         return await userRepository.getByIdAsync(id);
     }
 
-    private async Task<User> FindByemailAsync(string email)
+    private async Task<User> getByEmailAsync(string email)
     {
         return await userRepository.getByEmailAsync(email);
     }
 
-    private int GetTokenExpirationLength(bool stayLoggedIn)
+    private int getTokenExpirationLength(bool stayLoggedIn)
     {
-        return int.Parse(stayLoggedIn ? configuration["TokenExpirationLong"] : configuration["TokenExpirationShort"]);
+        return int.Parse((stayLoggedIn ? Environment.GetEnvironmentVariable("TOKEN_EXPIRATION_LONG") : Environment.GetEnvironmentVariable("TOKEN_EXPIRATION_SHORT")) ?? throw new Exception("No env variables for token length"));
     }
 
-    private string GenerateTemporaryPassword()
+    private string generateTemporaryPassword()
     {
-        using var rng = new RNGCryptoServiceProvider();
+        using var rng = RandomNumberGenerator.Create();
         var randomBytes = new byte[16];
         rng.GetBytes(randomBytes);
         return Convert.ToBase64String(randomBytes);
     }
 
-    private async Task SetDefaultSettingsAsync(long userId)
+    private async Task setDefaultSettingsAsync(long userId)
     {
         await taskUrgencyService.createDefaultItems(userId);
         await routineTimePeriodService.createDefaultItems(userId);
         await roleService.createDefaultItems(userId);
     }
 
-    private long GetLoggedUserId()
+    private long getLoggedUserId()
     {
         var user = authenticationService.GetUserAsync().Result; // Simplified; consider using async method
         if (user == null || !(user is LoggedUser))
