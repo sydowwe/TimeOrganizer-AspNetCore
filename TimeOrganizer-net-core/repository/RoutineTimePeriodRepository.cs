@@ -3,12 +3,12 @@ using TimeOrganizer_net_core.repository.abs;
 
 namespace TimeOrganizer_net_core.repository;
 
-public interface IRoutineTimePeriodRepository : IEntityWithUserRepository<RoutineTimePeriod>
+public interface IRoutineTimePeriodRepository : IRepository<RoutineTimePeriod>
 {
     Task changeIsHiddenInViewAsync(long id);
 }
 
-public class RoutineTimePeriodRepository(AppDbContext context) : EntityWithUserRepository<RoutineTimePeriod>(context), IRoutineTimePeriodRepository
+public class RoutineTimePeriodRepository(AppDbContext context) : ParentRepository<RoutineTimePeriod>(context), IRoutineTimePeriodRepository
 {
     public async Task changeIsHiddenInViewAsync(long id)
     {

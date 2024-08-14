@@ -17,15 +17,15 @@ public interface
 
 public abstract class EntityWithActivityService<TEntity, TRequest, TResponse, TRepository>(
     TRepository repository,
-    IActivityRepository activityRepository,
-    IUserRepository userRepository,
+    IActivityService activityService,
+    IUserService userService,
     IMapper mapper
-) : MyService<TEntity, TRequest, TResponse, TRepository>(repository, userRepository, mapper),
+) : MyService<TEntity, TRequest, TResponse, TRepository>(repository, userService, mapper),
     IEntityWithActivityService<TEntity, TRequest, TResponse>
     where TEntity : AbstractEntityWithActivity
     where TRequest : IActivityIdRequest
     where TResponse : IEntityWithActivityResponse
     where TRepository : IEntityWithActivityRepository<TEntity>
 {
-    protected readonly IActivityRepository activityRepository = activityRepository;
+    protected readonly IActivityService activityService = activityService;
 }

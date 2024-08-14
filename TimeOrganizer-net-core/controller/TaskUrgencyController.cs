@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using TimeOrganizer_net_core.controller.extendable;
+using TimeOrganizer_net_core.model.DTO.request.generic;
 using TimeOrganizer_net_core.model.DTO.request.ToDoList;
+using TimeOrganizer_net_core.model.DTO.response.generic;
 using TimeOrganizer_net_core.model.DTO.response.toDoList;
 using TimeOrganizer_net_core.model.entity;
 using TimeOrganizer_net_core.service;
@@ -11,15 +13,24 @@ namespace TimeOrganizer_net_core.controller;
 [Route("[controller]")]
 public class TaskUrgencyController(ITaskUrgencyService service) : AbstractCrudController<TaskUrgency,TaskUrgencyRequest,TaskUrgencyResponse,ITaskUrgencyService>(service)
 {
-    [HttpPost("get-all")]
-    public override async Task<ActionResult<IEnumerable<TaskUrgencyResponse>>> getAll()
+    [NonAction]
+    public override Task<ActionResult<TaskUrgencyResponse>> create(TaskUrgencyRequest request)
     {
-        return await base.getAll();
+        return null;
     }
-
-    [HttpGet("{id:long}")]
-    public override async Task<ActionResult<TaskUrgencyResponse>> get(long id)
-    {       
-        return await base.get(id);
+    [NonAction]
+    public override Task<ActionResult<TaskUrgencyResponse>> update(long id, TaskUrgencyRequest request)
+    {
+        return null;
+    }
+    [NonAction]
+    public override  Task<ActionResult<IdResponse>> delete(long id)
+    {
+        return null;
+    }
+    [NonAction]
+    public override Task<ActionResult<SuccessResponse>> batchDelete(List<IdRequest> request)
+    {
+        return null;
     }
 }

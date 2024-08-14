@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TimeOrganizer_net_core.controller.extendable;
 using TimeOrganizer_net_core.model.DTO.request;
 using TimeOrganizer_net_core.model.DTO.request.extendable;
+using TimeOrganizer_net_core.model.DTO.request.generic;
 using TimeOrganizer_net_core.model.DTO.response.generic;
 using TimeOrganizer_net_core.model.entity;
 using TimeOrganizer_net_core.service;
@@ -18,29 +19,21 @@ public class RoleController(IRoleService service) : AbstractCrudController<Role,
         await service.createDefaultItems(0);
         return Ok("ok");
     }
-    [HttpPost("get-all")]
-    public override async Task<ActionResult<IEnumerable<NameTextColorIconResponse>>> getAll()
+   
+    [NonAction]
+    public override Task<ActionResult<NameTextColorIconResponse>> update(long id, NameTextColorIconRequest request)
     {
-        return await base.getAll();
+        return null;
     }
-    [HttpPost("get/{id:long}")]
-    public override async Task<ActionResult<NameTextColorIconResponse>> get(long id)
+    [NonAction]
+    public override  Task<ActionResult<IdResponse>> delete(long id)
     {
-        return await base.get(id);
+        return null;
     }
-    // [HttpPost("get-by-name/{name}")]
-    // public async Task<ActionResult<NameTextColorIconResponse>> GetByName(string name)
-    // {
-    //     var role = await _roleService.GetRoleByNameAsync(name);
-    //     if (role == null)
-    //         return NotFound();
-    //     return Ok(role);
-    // }
-
-    [HttpPost("create")]
-    public override async Task<ActionResult<NameTextColorIconResponse>> create(NameTextColorIconRequest newRole)
+    [NonAction]
+    public override Task<ActionResult<SuccessResponse>> batchDelete(List<IdRequest> request)
     {
-        return await base.create(newRole);
+        return null;
     }
    
 }

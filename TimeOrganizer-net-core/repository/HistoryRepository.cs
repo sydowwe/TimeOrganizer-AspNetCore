@@ -6,12 +6,12 @@ namespace TimeOrganizer_net_core.repository;
 
 public interface IHistoryRepository : IEntityWithActivityRepository<History>
 {
-    IQueryable<History> applyFilters(int userId, HistoryFilterRequest filter);
+    IQueryable<History> applyFilters(long userId, HistoryFilterRequest filter);
 }
 
 public class HistoryRepository(AppDbContext context) : EntityWithActivityRepository<History>(context), IHistoryRepository
 {
-    public IQueryable<History> applyFilters(int userId, HistoryFilterRequest filter)
+    public IQueryable<History> applyFilters(long userId, HistoryFilterRequest filter)
     {
         var query = context.histories.AsQueryable();
         query = query.Where(h => h.userId == userId);

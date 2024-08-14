@@ -1,6 +1,4 @@
 using AutoMapper;
-using TimeOrganizer_net_core.model.DTO.request;
-using TimeOrganizer_net_core.model.DTO.request.generic;
 using TimeOrganizer_net_core.model.DTO.request.ToDoList;
 using TimeOrganizer_net_core.model.DTO.response.toDoList;
 using TimeOrganizer_net_core.model.entity;
@@ -13,7 +11,7 @@ public interface IToDoListService : IEntityWithIsDoneService<ToDoList, ToDoListR
 {
 }
 
-public class ToDoListService(IToDoListRepository repository, IActivityRepository activityRepository, IUserRepository userRepository, IMapper mapper)
-    : EntityWithIsDoneService<ToDoList, ToDoListRequest, ToDoListResponse, IToDoListRepository>(repository, activityRepository, userRepository, mapper), IToDoListService
+public class ToDoListService(IToDoListRepository repository, IActivityService activityService, IUserService userService, IMapper mapper)
+    : EntityWithIsDoneService<ToDoList, ToDoListRequest, ToDoListResponse, IToDoListRepository>(repository, activityService, userService, mapper), IToDoListService
 {
 };

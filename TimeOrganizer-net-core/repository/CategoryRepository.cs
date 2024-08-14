@@ -3,8 +3,8 @@ using TimeOrganizer_net_core.repository.abs;
 
 namespace TimeOrganizer_net_core.repository;
 
-public interface ICategoryRepository : IEntityWithUserRepository<Category>
+public interface ICategoryRepository : IRepository<Category>
 {
 }
 
-public class CategoryRepository(AppDbContext context) : EntityWithUserRepository<Category>(context), ICategoryRepository;
+public class CategoryRepository(AppDbContext context) : ParentRepository<Category>(context), ICategoryRepository;

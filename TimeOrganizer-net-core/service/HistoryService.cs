@@ -1,4 +1,5 @@
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using TimeOrganizer_net_core.model.DTO.request.history;
 using TimeOrganizer_net_core.model.DTO.response.history;
@@ -13,19 +14,15 @@ public interface IHistoryService : IEntityWithActivityService<History, HistoryRe
     Task<List<HistoryListGroupedByDateResponse>> filterAsync(HistoryFilterRequest filterRequest);
 }
 
-public class HistoryService(IHistoryRepository repository, IUserRepository userRepository, IMapper mapper)
-    : MyService<History, HistoryRequest, HistoryResponse, IHistoryRepository>(repository, userRepository, mapper), IHistoryService
+public class HistoryService(IHistoryRepository repository, IUserService userService, IMapper mapper)
+    : MyService<History, HistoryRequest, HistoryResponse, IHistoryRepository>(repository, userService, mapper), IHistoryService
 {
        public async Task<List<HistoryListGroupedByDateResponse>> filterAsync(HistoryFilterRequest filterRequest)
     {
-        // var userId = await userService.GetLoggedUserAsync();
-        var userId = 1;
-        // Apply filters
         var query = repository.applyFilters(userId, filterRequest);
 
-        var historyResponses = await query
-            .Select(h => mapper.Map<HistoryResponse>(h))
-            .ToListAsync();
+        var historyResponses = await query.OrderBy(h=>h.startTimestamp)
+            .ProjectTo<HistoryResponse>(mapper.ConfigurationProvider).ToListAsync();
 
         return historyResponses
             .GroupBy(hr => hr.startTimestamp.ToUniversalTime().Date)
@@ -40,7 +37,7 @@ public class HistoryService(IHistoryRepository repository, IUserRepository userR
     //     var query = context.Histories.AsQueryable();
     //
     //     // Apply filters
-    //     query = ApplyFilters(query, loggedUserId, request);
+    //     query = applyFilters(query, loggedUserId, request);
     //
     //     var activityList = await query
     //         .Select(h => h.Activity)

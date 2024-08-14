@@ -19,10 +19,10 @@ public interface IEntityWithIsDoneService<TEntity, in TRequest, TResponse>
 
 public abstract class EntityWithIsDoneService<TEntity, TRequest, TResponse, TRepository>(
     TRepository repository,
-    IActivityRepository activityRepository,
-    IUserRepository userRepository,
+    IActivityService activityService,
+    IUserService userService,
     IMapper mapper
-) : EntityWithActivityService<TEntity, TRequest, TResponse, TRepository>(repository, activityRepository, userRepository,
+) : EntityWithActivityService<TEntity, TRequest, TResponse, TRepository>(repository, activityService, userService,
         mapper),
     IEntityWithIsDoneService<TEntity, TRequest, TResponse>
     where TEntity : AbstractEntityWithIsDone

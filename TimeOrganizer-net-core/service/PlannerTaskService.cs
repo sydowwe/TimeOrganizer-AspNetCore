@@ -12,14 +12,12 @@ public interface IPlannerTaskService : IEntityWithIsDoneService<PlannerTask, Pla
     Task<List<PlannerTaskResponse>> getAllByDateAndHourSpan(PlannerFilterRequest request);
 }
 
-public class PlannerTaskService(IPlannerTaskRepository repository,IActivityRepository activityRepository, IUserRepository userRepository, IMapper mapper)
-    : EntityWithIsDoneService<PlannerTask, PlannerTaskRequest, PlannerTaskResponse, IPlannerTaskRepository>(repository, activityRepository, userRepository, mapper), IPlannerTaskService
+public class PlannerTaskService(IPlannerTaskRepository repository,IActivityService activityService, IUserService userService, IMapper mapper)
+    : EntityWithIsDoneService<PlannerTask, PlannerTaskRequest, PlannerTaskResponse, IPlannerTaskRepository>(repository, activityService, userService, mapper), IPlannerTaskService
 {
     public async Task<List<PlannerTaskResponse>> getAllByDateAndHourSpan(PlannerFilterRequest request)
     {
-        var userId = 0; //userService.GetLoggedUser().Id;
         var endDate = request.filterDate.AddSeconds(request.hourSpan * 3600);
-        
         var tasks = await repository.getAllByDateAndHourSpan(userId, request.filterDate, endDate);
         return mapper.Map<List<PlannerTaskResponse>>(tasks);
     }

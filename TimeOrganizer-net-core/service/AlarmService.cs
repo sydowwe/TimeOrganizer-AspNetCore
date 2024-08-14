@@ -13,8 +13,8 @@ public interface IAlarmService : IEntityWithActivityService<Alarm, AlarmRequest,
     Task setIsActive(IEnumerable<IdRequest> requestList);
 }
 
-public class AlarmService(IAlarmRepository repository, IUserRepository userRepository, IMapper mapper)
-    : MyService<Alarm, AlarmRequest, AlarmResponse, IAlarmRepository>(repository, userRepository, mapper), IAlarmService
+public class AlarmService(IAlarmRepository repository, IUserService userService, IMapper mapper)
+    : MyService<Alarm, AlarmRequest, AlarmResponse, IAlarmRepository>(repository, userService, mapper), IAlarmService
 {
     public async Task setIsActive(IEnumerable<IdRequest> requestList)
     {

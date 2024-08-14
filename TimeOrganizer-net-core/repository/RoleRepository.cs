@@ -3,8 +3,8 @@ using TimeOrganizer_net_core.repository.abs;
 
 namespace TimeOrganizer_net_core.repository;
 
-public interface IRoleRepository : IEntityWithUserRepository<Role>
+public interface IRoleRepository : IRepository<Role>
 {
 }
 
-public class RoleRepository(AppDbContext context) : EntityWithUserRepository<Role>(context), IRoleRepository;
+public class RoleRepository(AppDbContext context) : ParentRepository<Role>(context), IRoleRepository;

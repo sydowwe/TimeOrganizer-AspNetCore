@@ -12,22 +12,6 @@ namespace TimeOrganizer_net_core.controller;
 [Route("[controller]")]
 public class RoutineTimePeriodController(IRoutineTimePeriodService service) : AbstractCrudController<RoutineTimePeriod,TimePeriodRequest,TimePeriodResponse,IRoutineTimePeriodService>(service)
 {
-    [HttpPost("get-all")]
-    public override async Task<ActionResult<IEnumerable<TimePeriodResponse>>> getAll()
-    {
-        return await base.getAll();
-    }
-
-    [HttpGet("{id:long}")]
-    public override async Task<ActionResult<TimePeriodResponse>> get(long id)
-    {
-        return await base.get(id);
-    }
-    [HttpPut("{id:long}")]
-    public async Task<ActionResult<TimePeriodResponse>> edit(long id, TimePeriodRequest request)
-    {
-        return await base.update(id,request);
-    }
     [HttpPost("create-defaults")]
     public async Task<ActionResult<IEnumerable<TimePeriodResponse>>> createDefaults()
     {

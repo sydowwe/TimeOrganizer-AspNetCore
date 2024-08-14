@@ -12,5 +12,5 @@ public interface ICategoryService : IMyService<Category, NameTextColorIconReques
 {
 }
 
-public class CategoryService(ICategoryRepository repository, IUserRepository userRepository, IMapper mapper)
-    : MyService<Category, NameTextColorIconRequest, NameTextColorIconResponse, ICategoryRepository>(repository, userRepository, mapper), ICategoryService;
+public class CategoryService(ICategoryRepository repository, IUserService userService, IMapper mapper)
+    : MyService<Category, NameTextColorIconRequest, NameTextColorIconResponse, ICategoryRepository>(repository, userService, mapper), ICategoryService;

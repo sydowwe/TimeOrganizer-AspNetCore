@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using TimeOrganizer_net_core.controller.extendable;
 using TimeOrganizer_net_core.model.DTO.request;
+using TimeOrganizer_net_core.model.DTO.request.generic;
+using TimeOrganizer_net_core.model.DTO.request.ToDoList;
 using TimeOrganizer_net_core.model.DTO.response;
+using TimeOrganizer_net_core.model.DTO.response.generic;
+using TimeOrganizer_net_core.model.DTO.response.toDoList;
 using TimeOrganizer_net_core.model.entity;
 using TimeOrganizer_net_core.service;
 
@@ -11,15 +15,24 @@ namespace TimeOrganizer_net_core.controller;
 [Route("[controller]")]
 public class WebExtensionDataController(IWebExtensionDataService service) : AbstractWithActivityController<WebExtensionData,WebExtensionDataRequest,WebExtensionDataResponse,IWebExtensionDataService>(service)
 {
-    [HttpPost("get-all")]
-    public override async Task<ActionResult<IEnumerable<WebExtensionDataResponse>>> getAll()
+    [NonAction]
+    public override Task<ActionResult<WebExtensionDataResponse>> get(long id)
     {
-        return await base.getAll();
+        return null;
     }
-
-    [HttpPost("create")]
-    public override async Task<ActionResult<WebExtensionDataResponse>> create(WebExtensionDataRequest request)
+    [NonAction]
+    public override Task<ActionResult<WebExtensionDataResponse>> update(long id, WebExtensionDataRequest request)
     {
-        return await base.create(request);
+        return null;
+    }
+    [NonAction]
+    public override  Task<ActionResult<IdResponse>> delete(long id)
+    {
+        return null;
+    }
+    [NonAction]
+    public override Task<ActionResult<SuccessResponse>> batchDelete(List<IdRequest> request)
+    {
+        return null;
     }
 }

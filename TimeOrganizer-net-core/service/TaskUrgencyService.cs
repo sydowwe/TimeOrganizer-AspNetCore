@@ -9,13 +9,13 @@ namespace TimeOrganizer_net_core.service;
 
 public interface ITaskUrgencyService : IMyService<TaskUrgency, TaskUrgencyRequest, TaskUrgencyResponse>
 {
-    void createDefaultItems(long userId);
+    Task createDefaultItems(long newUserId);
 }
 
-public class TaskUrgencyService(ITaskUrgencyRepository repository, IUserRepository userRepository, IMapper mapper)
-    : MyService<TaskUrgency, TaskUrgencyRequest, TaskUrgencyResponse, ITaskUrgencyRepository>(repository, userRepository, mapper), ITaskUrgencyService
+public class TaskUrgencyService(ITaskUrgencyRepository repository, IUserService userService, IMapper mapper)
+    : MyService<TaskUrgency, TaskUrgencyRequest, TaskUrgencyResponse, ITaskUrgencyRepository>(repository, userService, mapper), ITaskUrgencyService
 {
-    public void createDefaultItems(long userId)
+    public async Task createDefaultItems(long newUserId)
     {
         this.repository.addRangeAsync(
             [

@@ -1,4 +1,6 @@
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using TimeOrganizer_net_core.model.DTO.request;
 using TimeOrganizer_net_core.model.DTO.request.extendable;
 using TimeOrganizer_net_core.model.DTO.request.generic;
@@ -22,7 +24,7 @@ public interface IMyService<TEntity, in TRequest, TResponse>
 
 public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
     TRepository repository,
-    IUserRepository userRepository,
+    IUserService userService,
     IMapper mapper
 ) : IMyService<TEntity, TRequest, TResponse>
     where TEntity : AbstractEntityWithUser
@@ -31,8 +33,9 @@ public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
     where TRepository : IRepository<TEntity>
 {
     protected readonly TRepository repository = repository;
-    protected readonly IUserRepository userRepository = userRepository;
+    protected readonly IUserService userService = userService;
     protected readonly IMapper mapper = mapper;
+    protected long userId = 1;
     
     public async Task<TResponse> getByIdAsync(long id)
     {
@@ -46,8 +49,7 @@ public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
 
     public async Task<IEnumerable<TResponse>> getAllAsync()
     {
-        var entities = await repository.getAllAsync();
-        return mapper.Map<List<TResponse>>(entities);
+        return await repository.getAsQueryable(userId).ProjectTo<TResponse>(mapper.ConfigurationProvider).ToListAsync();
     }
 
     public async Task<TResponse> insertAsync(TRequest request)
@@ -71,7 +73,6 @@ public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
         {
             throw new KeyNotFoundException($"Entity with id {id} not found.");
         }
-
         mapper.Map(request, entity);
         await repository.updateAsync(entity);
         return mapper.Map<TResponse>(entity);

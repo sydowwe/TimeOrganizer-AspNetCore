@@ -11,5 +11,5 @@ public interface IWebExtensionDataService : IEntityWithActivityService<WebExtens
 {
 }
 
-public class WebExtensionDataService(IWebExtensionDataRepository repository, IUserRepository userRepository, IMapper mapper)
-    : MyService<WebExtensionData, WebExtensionDataRequest, WebExtensionDataResponse, IWebExtensionDataRepository>(repository, userRepository, mapper), IWebExtensionDataService;
+public class WebExtensionDataService(IWebExtensionDataRepository repository, IUserService userService, IMapper mapper)
+    : MyService<WebExtensionData, WebExtensionDataRequest, WebExtensionDataResponse, IWebExtensionDataRepository>(repository, userService, mapper), IWebExtensionDataService;

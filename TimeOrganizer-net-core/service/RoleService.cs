@@ -10,13 +10,13 @@ namespace TimeOrganizer_net_core.service;
 
 public interface IRoleService : IMyService<Role, NameTextColorIconRequest, NameTextColorIconResponse>
 {
-    Task createDefaultItems(long userId);
+    Task createDefaultItems(long newUserId);
 }
 
-public class RoleService(IRoleRepository repository, IUserRepository userRepository, IMapper mapper)
-    : MyService<Role, NameTextColorIconRequest, NameTextColorIconResponse,IRoleRepository>(repository, userRepository, mapper), IRoleService
+public class RoleService(IRoleRepository repository, IUserService userService, IMapper mapper)
+    : MyService<Role, NameTextColorIconRequest, NameTextColorIconResponse,IRoleRepository>(repository, userService, mapper), IRoleService
 {
-    public async Task createDefaultItems(long userId)
+    public async Task createDefaultItems(long newUserId)
     {
         await this.repository.addRangeAsync(
             [
