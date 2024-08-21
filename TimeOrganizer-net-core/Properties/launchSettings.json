@@ -32,7 +32,8 @@
         "OAUTH2_GOOGLE_CLIENT_ID":"your-client-id",
         "OAUTH2_GOOGLE_CLIENT_SECRET":"your-client-secret",
         "OAUTH2_GOOGLE_REDIRECT_URI":"http://localhost:5000/signin-google",
-
+        "TOKEN_EXPIRATION_LONG": "120",
+        "TOKEN_EXPIRATION_SHORT": "60",
         "TOKEN_BLACKLIST_CLEANUP_PERIOD_IN_SEC": "3600",
         
         "DB_DDL_TYPE":"Create",

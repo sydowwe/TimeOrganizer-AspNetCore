@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -8,13 +9,6 @@ namespace TimeOrganizer_net_core.model.entity;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-public enum UserRole
-{
-    Admin,
-    User,
-    Guest
-}
-
 public enum AvailableLocales
 {
     En,
@@ -22,32 +16,13 @@ public enum AvailableLocales
     // add more locales as needed
 }
 
-public class User : AbstractEntity
+public class User : IdentityUser
 {
     // Name
     [Required] public string name { get; set; }
 
     // Surname
     [Required] public string surname { get; set; }
-
-    // Email
-    [Required]
-    [EmailAddress]
-    //Unique
-    public string email { get; set; }
-
-    // Password
-    [Required] public string password { get; set; }
-
-    // 2FA Secret Key
-    //Unique
-    public string secretKey2FA { get; set; }
-
-    // User Role
-    [Required] public UserRole role { get; set; }
-
-    // Scratch Codes
-    public List<int> scratchCodes { get; set; } = new List<int>();
 
     // Stay Logged In
     [Required] public bool isStayLoggedIn { get; set; }
@@ -57,7 +32,7 @@ public class User : AbstractEntity
 
     // Timezone
     [Required] public TimeZoneInfo timezone { get; set; } // Assuming ZoneIdDBConverter is for ZoneId, store as string
-
+    
     // Navigation properties for related entities
     public virtual ICollection<Activity> activityList { get; set; } = new List<Activity>();
     public virtual ICollection<Category> categoryList { get; set; } = new List<Category>();
@@ -69,24 +44,6 @@ public class User : AbstractEntity
     public User() : base()
     {
     }
-
-    public User(string name, string surname, string email, string password, UserRole role, AvailableLocales locale,
-        TimeZoneInfo timezone) : base()
-    {
-        this.name = name;
-        this.surname = surname;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-        this.currentLocale = locale;
-        this.timezone = timezone;
-    }
-
-    // Method to check if 2FA is enabled
-    public bool has2FA()
-    {
-        return !string.IsNullOrWhiteSpace(secretKey2FA);
-    }
 }
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
@@ -96,10 +53,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.ToTable("User", schema: "public");
 
         // Primary key
-        builder.HasKey(u => u.id);
+        builder.HasKey(u => u.Id);
 
         // Indexes
-        builder.HasIndex(u => u.email).IsUnique(); // Unique constraint on Email
+        builder.HasIndex(u => u.Email).IsUnique(); // Unique constraint on Email
 
         // Property configurations
         builder.Property(u => u.name)
@@ -110,11 +67,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(100); // Adjust length as needed
 
-        builder.Property(u => u.email)
+        builder.Property(u => u.Email)
             .IsRequired()
             .HasMaxLength(256); // Adjust length as needed
 
-        builder.Property(u => u.password)
+        builder.Property(u => u.PasswordHash)
             .IsRequired();
 
         builder.Property(u => u.secretKey2FA)
@@ -123,12 +80,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.isStayLoggedIn)
             .IsRequired();
 
-        // Enum configuration
-        builder.Property(u => u.role)
-            .HasConversion(
-                v => v.ToString(),
-                v => (UserRole)Enum.Parse(typeof(UserRole), v))
-            .IsRequired();
+
 
         builder.Property(u => u.currentLocale)
             .HasConversion(
