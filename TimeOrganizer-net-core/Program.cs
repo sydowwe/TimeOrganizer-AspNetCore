@@ -21,7 +21,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
 builder.Services.AddScoped<IAlarmRepository, AlarmRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -56,28 +56,10 @@ builder.Services.AddAutoMapper(typeof(ActivityProfile).Assembly);
 // Configure mail settings
 // builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
-// Configure OAuth2 authentication
-// builder.Services.AddAuthentication(options =>
-//     {
-//         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-//         options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-//     })
-//     .AddCookie()
-//     .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
-//     {
-//         options.ClientId = builder.Configuration["OAuth2:Google:ClientId"];
-//         options.ClientSecret = builder.Configuration["OAuth2:Google:ClientSecret"];
-//         options.CallbackPath = new PathString(builder.Configuration["OAuth2:Google:RedirectUri"]);
-//     });
-
-// JWT
-// builder.Services.AddSingleton<IJwtService, JwtService>();
-// builder.Services.addJwtAuthentication(builder.Configuration);
 builder.Services.AddIdentityServices();
-
-
 builder.Services.AddDistributedMemoryCache(); // You can replace this with Redis for distributed caching
 builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); // Set session timeout
@@ -86,35 +68,7 @@ builder.Services.AddSession(options =>
     options.Cookie.SameSite = SameSiteMode.Strict;
     options.Cookie.MaxAge = TimeSpan.FromHours(3);
 });
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    // Cookie settings
-    options.Cookie.HttpOnly = true;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
 
-    options.LoginPath = "/Identity/Account/Login";
-    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-    options.SlidingExpiration = true;
-});
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.Cookie.HttpOnly = true;
-        options.Cookie.IsEssential = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.Strict;
-        options.Cookie.MaxAge = TimeSpan.FromHours(3);
-
-        options.SlidingExpiration = true;
-        options.LoginPath = "/api/user/auth/login";
-        options.LogoutPath = "/api/user/auth/logout";
-        options.Events.OnValidatePrincipal = async context =>
-        {
-            // Custom validation logic
-            await Task.CompletedTask;
-        };
-    });
-builder.Services.AddAuthorization();
 var app = builder.Build();
 
 

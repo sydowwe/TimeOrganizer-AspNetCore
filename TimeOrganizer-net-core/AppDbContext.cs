@@ -1,12 +1,15 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TimeOrganizer_net_core.model.entity;
 using TimeOrganizer_net_core.model.entity.abs;
+using TimeOrganizer_net_core.security;
 
 namespace TimeOrganizer_net_core;
 
 using Microsoft.EntityFrameworkCore;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<User, UserRole, long>(options)
 {
     public DbSet<User> users { get; set; }
     public DbSet<Activity> activities { get; set; }

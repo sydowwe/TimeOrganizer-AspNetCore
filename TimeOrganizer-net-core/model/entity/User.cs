@@ -16,7 +16,7 @@ public enum AvailableLocales
     // add more locales as needed
 }
 
-public class User : IdentityUser
+public class User : IdentityUser<long>
 {
     // Name
     [Required] public string name { get; set; }
@@ -73,9 +73,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.PasswordHash)
             .IsRequired();
-
-        builder.Property(u => u.secretKey2FA)
-            .HasMaxLength(256); // Adjust length as needed
 
         builder.Property(u => u.isStayLoggedIn)
             .IsRequired();

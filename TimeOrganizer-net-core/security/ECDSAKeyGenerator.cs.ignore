@@ -1,9 +1,7 @@
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
-
 namespace TimeOrganizer_net_core.security;
 
 using System;
+using System.Text;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -13,12 +11,12 @@ public static class ECDSAKeyGenerator
     private const string PublicKeyFilePath = "keys/ec-public-key.pem";
     private static readonly string PemPassword = Environment.GetEnvironmentVariable("PEM_PASSWORD") ?? throw new Exception("NO PEM_PASSWORD Env Variable");
     
-    public static ECDsaSecurityKey readPrivateKey()
+    public static ECDsa readPrivateKey()
     {
         var privateKeyPem = File.ReadAllText(PrivateKeyFilePath);
         var ecdsa = ECDsa.Create();
         ecdsa.ImportFromEncryptedPem(privateKeyPem, PemPassword);
-        return new ECDsaSecurityKey(ecdsa);
+        return ecdsa;
     }
 
     public static ECDsa readPublicKey()
