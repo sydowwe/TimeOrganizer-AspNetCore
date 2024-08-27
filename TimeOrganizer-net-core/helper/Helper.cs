@@ -6,6 +6,6 @@ public class Helper
 {
     public static string getEnvVar(string envName)
     {
-        return System.Environment.GetEnvironmentVariable(envName) ?? throw new EnvironmentVariableMissing(envName);
+        return System.Environment.GetEnvironmentVariable(envName) ?? throw new EnvironmentVariableMissingException(envName);
     }
 }

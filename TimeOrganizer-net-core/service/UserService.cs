@@ -61,8 +61,7 @@ public class UserService(
             Email = registration.Email,
             UserName = registration.Email,
             TwoFactorEnabled = registration.TwoFactorEnabled,
-            currentLocale = registration.currentLocale,
-            timezone = registration.timezone,
+            // currentLocale = registration.currentLocale,
             isStayLoggedIn = false
         };
         var result = await userManager.CreateAsync(newUser, registration.password);

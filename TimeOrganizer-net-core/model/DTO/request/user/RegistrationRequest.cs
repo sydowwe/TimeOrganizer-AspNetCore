@@ -6,6 +6,5 @@ public class RegistrationRequest : UserRequest
 {
     public string password { get; set; }
     public string recaptchaToken { get; set; }
-    public AvailableLocales currentLocale { get; set; }
-    public TimeZoneInfo timezone { get; set; }
+    // public AvailableLocales currentLocale { get; set; }
 }

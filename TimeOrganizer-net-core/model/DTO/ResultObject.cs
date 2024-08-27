@@ -44,7 +44,12 @@ public class ServiceResult<T> : ServiceResult where T : class
 
     public new static ServiceResult<T> Error(ServiceResultErrorType? errorType, string? errorMessage)
     {
-        return (ServiceResult<T>) ServiceResult.Error(errorType, errorMessage);
+        return new ServiceResult<T>
+        {
+            Success = false,
+            ErrorType = errorType,
+            ErrorMessage = errorMessage,
+        };;
     }
 
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TimeOrganizer_net_core;
+using TimeOrganizer_net_core.exception;
 using TimeOrganizer_net_core.helper;
 using TimeOrganizer_net_core.model.DTO.mapper;
 using TimeOrganizer_net_core.repository;
@@ -62,6 +63,18 @@ builder.Services.AddDistributedMemoryCache(); // You can replace this with Redis
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:3000", Environment.GetEnvironmentVariable("CORS_ENABLED_URL") ?? throw new EnvironmentVariableMissingException("CORS_ENABLED_URL"))
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); // Set session timeout
@@ -88,13 +101,14 @@ else
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
+app.UsePathBase(new PathString("/api"));
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
 
+app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 
+app.MapControllers();
 
 app.Run();

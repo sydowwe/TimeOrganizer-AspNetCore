@@ -19,8 +19,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "LOGGING_LEVEL":"Information",
         "PORT":"8080",
+        "CORS_ENABLED_URL": "https://localhost:3000",
         "APP_NAME": "TimeOrganizer",
-        "PEM_PASSWORD": "12345",
         
         "MAIL_SMTP_SERVER":"smtp.example.com",
         "MAIL_SMTP_PORT":"587",
@@ -33,9 +33,7 @@
         "OAUTH2_GOOGLE_CLIENT_SECRET":"your-client-secret",
         "OAUTH2_GOOGLE_REDIRECT_URI":"http://localhost:5000/signin-google",
         
-        "TOKEN_EXPIRATION_LONG": "120",
-        "TOKEN_EXPIRATION_SHORT": "60",
-        
+      
         "DB_DDL_TYPE":"Create",
         "POSTGRES_USER":"jakub",
         "POSTGRES_PASSWORD":"u9TwA2dUjhQS9sw%",
@@ -53,6 +51,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "LOGGING_LEVEL":"Information",
         "PORT":"8080",
+        "CORS_ENABLED_URL": "https://localhost:3000",
+        "APP_NAME": "TimeOrganizer",
 
         "MAIL_SMTP_SERVER":"smtp.example.com",
         "MAIL_SMTP_PORT":"587",
