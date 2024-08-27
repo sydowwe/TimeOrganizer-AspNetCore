@@ -4,6 +4,7 @@ using TimeOrganizer_net_core.model.DTO.request.extendable;
 using TimeOrganizer_net_core.model.DTO.response;
 using TimeOrganizer_net_core.model.entity;
 using TimeOrganizer_net_core.repository;
+using TimeOrganizer_net_core.security;
 using TimeOrganizer_net_core.service.abs;
 
 namespace TimeOrganizer_net_core.service;
@@ -13,20 +14,20 @@ public interface IActivityService : IMyService<Activity, ActivityRequest, Activi
   
 }
 
-public class ActivityService(IActivityRepository repository, IUserService userService, IMapper mapper)
-    : MyService<Activity, ActivityRequest, ActivityResponse, IActivityRepository>(repository, userService, mapper),
+public class ActivityService(IActivityRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
+    : MyService<Activity, ActivityRequest, ActivityResponse, IActivityRepository>(repository, loggedUserService, mapper),
         IActivityService
 {
     //TODO make activityForm selects methods
     public async Task<ActivityResponse> quickUpdateAsync(long id, NameTextRequest request)
     {
-        var entity = await repository.getByIdAsync(id);
+        var entity = await Repository.getByIdAsync(id);
         if (entity == null)
         {
             throw new KeyNotFoundException($"Entity with id {id} not found.");
         }
-        mapper.Map(request, entity);
-        await repository.updateAsync(entity);
-        return mapper.Map<ActivityResponse>(entity);
+        Mapper.Map(request, entity);
+        await Repository.updateAsync(entity);
+        return Mapper.Map<ActivityResponse>(entity);
     }
 }

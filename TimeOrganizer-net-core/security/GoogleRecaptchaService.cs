@@ -19,7 +19,7 @@ public class GoogleRecaptchaService(HttpClient httpClient) : IGoogleRecaptchaSer
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<RecaptchaResponse>(json);
 
-        return result.success && result.score > 0.5 && expectedAction.Equals(result.action);
+        return result is { success: true } && result.score > 0.5 && expectedAction.Equals(result.action);
     }
 }
 

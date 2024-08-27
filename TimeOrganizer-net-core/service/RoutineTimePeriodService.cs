@@ -3,6 +3,7 @@ using TimeOrganizer_net_core.model.DTO.request.ToDoList;
 using TimeOrganizer_net_core.model.DTO.response.toDoList;
 using TimeOrganizer_net_core.model.entity;
 using TimeOrganizer_net_core.repository;
+using TimeOrganizer_net_core.security;
 using TimeOrganizer_net_core.service.abs;
 
 namespace TimeOrganizer_net_core.service;
@@ -13,23 +14,23 @@ public interface IRoutineTimePeriodService : IMyService<RoutineTimePeriod, TimeP
     Task changeIsHiddenInViewAsync(long id);
 }
 
-public class RoutineTimePeriodService(IRoutineTimePeriodRepository repository, IUserService userService, IMapper mapper)
-    : MyService<RoutineTimePeriod, TimePeriodRequest, TimePeriodResponse,IRoutineTimePeriodRepository>(repository, userService, mapper), IRoutineTimePeriodService
+public class RoutineTimePeriodService(IRoutineTimePeriodRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
+    : MyService<RoutineTimePeriod, TimePeriodRequest, TimePeriodResponse,IRoutineTimePeriodRepository>(repository, loggedUserService, mapper), IRoutineTimePeriodService
 {
     public async Task createDefaultItems(long newUserId)
     {
-        await this.repository.addRangeAsync(
+        await this.Repository.addRangeAsync(
             [
-                new RoutineTimePeriod(userId, "Daily", "#92F58C", 1, false),         // Green
-                new RoutineTimePeriod(userId, "Weekly", "#936AF1", 7, false),      // purple
-                new RoutineTimePeriod(userId, "Monthly", "#2C7EF4", 30, false),     // blue
-                new RoutineTimePeriod(userId, "Yearly", "#A5CCF3", 365, false) 
+                new RoutineTimePeriod(loggedUserService.GetLoggedUserId(), "Daily", "#92F58C", 1, false),         // Green
+                new RoutineTimePeriod(loggedUserService.GetLoggedUserId(), "Weekly", "#936AF1", 7, false),      // purple
+                new RoutineTimePeriod(loggedUserService.GetLoggedUserId(), "Monthly", "#2C7EF4", 30, false),     // blue
+                new RoutineTimePeriod(loggedUserService.GetLoggedUserId(), "Yearly", "#A5CCF3", 365, false) 
             ]
         );
     }
 
     public async Task changeIsHiddenInViewAsync(long id)
     {
-        await repository.changeIsHiddenInViewAsync(id);
+        await Repository.changeIsHiddenInViewAsync(id);
     }
 }

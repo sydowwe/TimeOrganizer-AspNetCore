@@ -5,6 +5,7 @@ using TimeOrganizer_net_core.model.DTO.request.history;
 using TimeOrganizer_net_core.model.DTO.response.history;
 using TimeOrganizer_net_core.model.entity;
 using TimeOrganizer_net_core.repository;
+using TimeOrganizer_net_core.security;
 using TimeOrganizer_net_core.service.abs;
 
 namespace TimeOrganizer_net_core.service;
@@ -14,15 +15,15 @@ public interface IHistoryService : IEntityWithActivityService<History, HistoryRe
     Task<List<HistoryListGroupedByDateResponse>> filterAsync(HistoryFilterRequest filterRequest);
 }
 
-public class HistoryService(IHistoryRepository repository, IUserService userService, IMapper mapper)
-    : MyService<History, HistoryRequest, HistoryResponse, IHistoryRepository>(repository, userService, mapper), IHistoryService
+public class HistoryService(IHistoryRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
+    : MyService<History, HistoryRequest, HistoryResponse, IHistoryRepository>(repository, loggedUserService, mapper), IHistoryService
 {
        public async Task<List<HistoryListGroupedByDateResponse>> filterAsync(HistoryFilterRequest filterRequest)
     {
-        var query = repository.applyFilters(userId, filterRequest);
+        var query = Repository.applyFilters(loggedUserService.GetLoggedUserId(), filterRequest);
 
         var historyResponses = await query.OrderBy(h=>h.startTimestamp)
-            .ProjectTo<HistoryResponse>(mapper.ConfigurationProvider).ToListAsync();
+            .ProjectTo<HistoryResponse>(Mapper.ConfigurationProvider).ToListAsync();
 
         return historyResponses
             .GroupBy(hr => hr.startTimestamp.ToUniversalTime().Date)

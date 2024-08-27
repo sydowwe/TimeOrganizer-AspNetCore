@@ -40,17 +40,12 @@ public class User : IdentityUser<long>
     public virtual ICollection<Role> roleList { get; set; } = new List<Role>();
     public virtual ICollection<ToDoList> toDoListList { get; set; } = new List<ToDoList>();
     public virtual ICollection<TaskUrgency> taskUrgencyList { get; set; } = new List<TaskUrgency>();
-
-    public User() : base()
-    {
-    }
 }
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.ToTable("User", schema: "public");
 
         // Primary key
         builder.HasKey(u => u.Id);

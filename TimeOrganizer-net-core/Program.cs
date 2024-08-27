@@ -1,26 +1,23 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TimeOrganizer_net_core;
+using TimeOrganizer_net_core.helper;
 using TimeOrganizer_net_core.model.DTO.mapper;
-using TimeOrganizer_net_core.model.entity;
 using TimeOrganizer_net_core.repository;
 using TimeOrganizer_net_core.security;
 using TimeOrganizer_net_core.service;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDbContext<AppDbContext>(options =>
+      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+  );
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddControllers();
-
-// Configure Entity Framework Core to use PostgreSQL
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
 builder.Services.AddScoped<IAlarmRepository, AlarmRepository>();
@@ -34,7 +31,11 @@ builder.Services.AddScoped<IToDoListRepository, ToDoListRepository>();
 builder.Services.AddScoped<ITaskUrgencyRepository, TaskUrgencyRepository>();
 builder.Services.AddScoped<IWebExtensionDataRepository, WebExtensionDataRepository>();
 
+builder.Services.AddScoped<IGoogleRecaptchaService, GoogleRecaptchaService>();
+builder.Services.AddScoped<ILoggedUserService, LoggedUserService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 builder.Services.AddScoped<IAlarmService, AlarmService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -59,6 +60,7 @@ builder.Services.AddAutoMapper(typeof(ActivityProfile).Assembly);
 builder.Services.AddIdentityServices();
 builder.Services.AddDistributedMemoryCache(); // You can replace this with Redis for distributed caching
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddControllers();
 
 builder.Services.AddSession(options =>
 {
@@ -76,7 +78,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API V1");
+    });
 }
 else
 {

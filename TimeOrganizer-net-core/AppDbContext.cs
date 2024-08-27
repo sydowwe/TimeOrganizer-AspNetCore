@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TimeOrganizer_net_core.model.entity;
 using TimeOrganizer_net_core.model.entity.abs;
@@ -9,9 +8,11 @@ namespace TimeOrganizer_net_core;
 
 using Microsoft.EntityFrameworkCore;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<User, UserRole, long>(options)
+public class AppDbContext : IdentityDbContext<User, UserRole, long>
 {
-    public DbSet<User> users { get; set; }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+    }
     public DbSet<Activity> activities { get; set; }
     public DbSet<Alarm> alarms { get; set; }
     public DbSet<Category> categories { get; set; }
@@ -43,8 +44,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         base.OnModelCreating(modelBuilder);
     }
-    
-    
     public override int SaveChanges()
     {
         foreach (var entry in ChangeTracker.Entries<AbstractEntity>())
@@ -59,7 +58,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
                 entry.Entity.modifiedTimestamp = DateTime.UtcNow;
             }
         }
-
         return base.SaveChanges();
     }
 

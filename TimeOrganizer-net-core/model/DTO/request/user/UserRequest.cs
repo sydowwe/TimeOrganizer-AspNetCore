@@ -4,5 +4,5 @@ public class UserRequest : EmailRequest
 {
     public string name { get; set; }
     public string surname { get; set; }
-    public bool has2FA { get; set; }
+    public bool TwoFactorEnabled { get; set; }
 }

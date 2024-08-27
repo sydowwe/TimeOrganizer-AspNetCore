@@ -9,6 +9,7 @@ using TimeOrganizer_net_core.model.entity;
 using TimeOrganizer_net_core.model.entity.abs;
 using TimeOrganizer_net_core.repository;
 using TimeOrganizer_net_core.repository.abs;
+using TimeOrganizer_net_core.security;
 
 namespace TimeOrganizer_net_core.service.abs;
 
@@ -24,7 +25,7 @@ public interface IMyService<TEntity, in TRequest, TResponse>
 
 public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
     TRepository repository,
-    IUserService userService,
+    ILoggedUserService loggedUserService, 
     IMapper mapper
 ) : IMyService<TEntity, TRequest, TResponse>
     where TEntity : AbstractEntityWithUser
@@ -32,60 +33,58 @@ public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
     where TResponse : IResponse
     where TRepository : IRepository<TEntity>
 {
-    protected readonly TRepository repository = repository;
-    protected readonly IUserService userService = userService;
-    protected readonly IMapper mapper = mapper;
-    protected long userId = 1;
+    protected readonly TRepository Repository = repository;
+    protected readonly IMapper Mapper = mapper;
     
     public async Task<TResponse> getByIdAsync(long id)
     {
-        var entity = await repository.getByIdAsync(id);
+        var entity = await Repository.getByIdAsync(id);
         if (entity == null)
         {
             throw new KeyNotFoundException($"Entity with id {id} not found.");
         }
-        return mapper.Map<TResponse>(entity);
+        return Mapper.Map<TResponse>(entity);
     }
 
     public async Task<IEnumerable<TResponse>> getAllAsync()
     {
-        return await repository.getAsQueryable(userId).ProjectTo<TResponse>(mapper.ConfigurationProvider).ToListAsync();
+        return await Repository.getAsQueryable(loggedUserService.GetLoggedUserId()).ProjectTo<TResponse>(Mapper.ConfigurationProvider).ToListAsync();
     }
 
     public async Task<TResponse> insertAsync(TRequest request)
     {
-        var entity = mapper.Map<TEntity>(request);
-        await repository.addAsync(entity);
-        return mapper.Map<TResponse>(entity);
+        var entity = Mapper.Map<TEntity>(request);
+        await Repository.addAsync(entity);
+        return Mapper.Map<TResponse>(entity);
     }
 
     public async Task<IEnumerable<TResponse>> insertRangeAsync(IEnumerable<TRequest> request)
     {
-        var entities = mapper.Map<IEnumerable<TEntity>>(request);
-        await repository.addRangeAsync(entities);
-        return mapper.Map<IEnumerable<TResponse>>(entities);
+        var entities = Mapper.Map<IEnumerable<TEntity>>(request);
+        await Repository.addRangeAsync(entities);
+        return Mapper.Map<IEnumerable<TResponse>>(entities);
     }
 
     public async Task<TResponse> updateAsync(long id, TRequest request)
     {
-        var entity = await repository.getByIdAsync(id);
+        var entity = await Repository.getByIdAsync(id);
         if (entity == null)
         {
             throw new KeyNotFoundException($"Entity with id {id} not found.");
         }
-        mapper.Map(request, entity);
-        await repository.updateAsync(entity);
-        return mapper.Map<TResponse>(entity);
+        Mapper.Map(request, entity);
+        await Repository.updateAsync(entity);
+        return Mapper.Map<TResponse>(entity);
     }
 
     public async Task deleteAsync(long id)
     {
-        await repository.deleteAsync(id);
+        await Repository.deleteAsync(id);
     }
 
     public async Task batchDeleteAsync(IEnumerable<IdRequest> requestList)
     {
         var ids = requestList.Select(req => req.id);
-        await repository.batchDeleteAsync(i => ids.Contains(i.id));
+        await Repository.batchDeleteAsync(i => ids.Contains(i.id));
     }
 }

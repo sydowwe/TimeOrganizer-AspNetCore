@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using TimeOrganizer_net_core.helper;
 using TimeOrganizer_net_core.model.entity;
 
 namespace TimeOrganizer_net_core.security;
@@ -19,47 +20,40 @@ public static class IdentityServiceExtensions
         //     options.SlidingExpiration = true; // Resets the expiration time if the user is active
         // });
         
-        services.AddIdentity<User, Role>(options =>
+        services.AddIdentity<User, UserRole>(options =>
             {
                 // Password settings.
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
                 options.Password.RequiredLength = 8;
                 options.Password.RequiredUniqueChars = 4;
                 // Lockout settings.
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;
 
                 options.User.RequireUniqueEmail = true;
-                options.Stores.ProtectPersonalData = true;
-                
+                // options.Stores.ProtectPersonalData = true;
                 options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Email;
             })
             .AddEntityFrameworkStores<AppDbContext>() // Use the custom DbContext
-            .AddDefaultTokenProviders();
-
-        services.AddAuthentication()
-            // .AddGoogle(options =>
+            .AddDefaultTokenProviders()
+            // .AddPersonalDataProtection<>()
+            .AddApiEndpoints();
+        // services.AddAuthentication()
+        //     .AddGoogle(options =>
+        //     {
+        //         options.ClientId = Helper.getEnvVar("OAUTH2_GOOGLE_CLIENT_ID");
+        //         options.ClientSecret = Helper.getEnvVar("OAUTH2_GOOGLE_CLIENT_SECRET");
+        //         options.CallbackPath = Helper.getEnvVar("OAUTH2_GOOGLE_REDIRECT_URI");
+        //     });
+            // .AddIdentityCookies(options =>
             // {
-            //     options.ClientId = Configuration["Authentication:Google:ClientId"];
-            //     options.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
-            // })
-            .AddIdentityCookies(options =>
-            {
-                options.ApplicationCookie?.Configure(opt =>
-                {
-                    opt.Cookie.IsEssential = true;
-                    opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                    opt.Cookie.SameSite = SameSiteMode.Strict;
-                    opt.Cookie.MaxAge = TimeSpan.FromHours(3);
-                });
-            });
+            //     options.ApplicationCookie?.Configure(opt =>
+            //     {
+            //         opt.Cookie.IsEssential = true;
+            //         opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            //         opt.Cookie.SameSite = SameSiteMode.Strict;
+            //         opt.Cookie.MaxAge = TimeSpan.FromHours(3);
+            //     });
+            // });
         services.AddAuthorization();
 
-        services.AddIdentityApiEndpoints<User>();
         return services;
     }
 }

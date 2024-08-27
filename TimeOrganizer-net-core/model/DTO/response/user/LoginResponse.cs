@@ -3,10 +3,8 @@ using TimeOrganizer_net_core.model.entity;
 
 namespace TimeOrganizer_net_core.model.DTO.response.user;
 
-public class LoginResponse : IdResponse
+public class LoginResponse : EmailResponse
 {
-    public string email { get; set; }
-    public string token { get; set; }
-    public bool has2FA { get; set; }
-    public AvailableLocales currentLocale { get; set; }
+    public bool RequiresTwoFactor { get; set; }
+    public AvailableLocales CurrentLocale { get; set; }
 }
