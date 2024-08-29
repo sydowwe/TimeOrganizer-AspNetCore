@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-public class History : AbstractEntityWithActivity
+public class ActivityHistory : AbstractEntityWithActivity
 {
     [Required]
     public DateTime startTimestamp { get; set; }
@@ -20,9 +20,9 @@ public class History : AbstractEntityWithActivity
     [Required]
     public DateTime endTimestamp { get; set; }
 }
-public class HistoryConfiguration : IEntityTypeConfiguration<History>
+public class HistoryConfiguration : IEntityTypeConfiguration<ActivityHistory>
 {
-    public void Configure(EntityTypeBuilder<History> builder)
+    public void Configure(EntityTypeBuilder<ActivityHistory> builder)
     {
         builder.ToTable("History", schema: "public");
 

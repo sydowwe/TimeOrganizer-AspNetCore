@@ -10,6 +10,6 @@ public class RoutineToDoListProfile : Profile
     public RoutineToDoListProfile()
     {
         CreateMap<RoutineToDoListRequest, RoutineToDoList>();
-        CreateMap<RoutineTimePeriod, RoutineToDoListResponse>();
+        CreateMap<RoutineToDoList, RoutineToDoListResponse>();
     }
 }

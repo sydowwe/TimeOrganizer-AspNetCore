@@ -1,11 +1,10 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using TimeOrganizer_net_core.helper;
 using TimeOrganizer_net_core.model.entity;
+using TimeOrganizer_net_core.security;
 
-namespace TimeOrganizer_net_core.security;
+namespace TimeOrganizer_net_core.config;
 
 public static class IdentityServiceExtensions
 {

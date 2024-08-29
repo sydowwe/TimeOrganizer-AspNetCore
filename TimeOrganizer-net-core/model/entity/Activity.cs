@@ -28,7 +28,7 @@ public class Activity : AbstractNameTextEntity
     public long? categoryId { get; set; }
 
     // public virtual ICollection<Alarm> alarmList { get; set; } = new List<Alarm>();
-    public virtual ICollection<History> historyList { get; set; } = new List<History>();
+    public virtual ICollection<ActivityHistory> historyList { get; set; } = new List<ActivityHistory>();
     public virtual ICollection<WebExtensionData> webExtensionDataList { get; set; } = new List<WebExtensionData>();
 }
 public class ActivityConfiguration : IEntityTypeConfiguration<Activity>

@@ -12,7 +12,7 @@ namespace TimeOrganizer_net_core.controller;
 public class UserController(IUserService userService) : ControllerBase
 {
     [AllowAnonymous]
-    [HttpPost("auth/register")]
+    [HttpPost("register")]
     public async Task<IActionResult> RegisterUserAsync([FromBody] RegistrationRequest registrationRequest)
     {
         var result = await userService.RegisterUserAsync(registrationRequest);
@@ -28,7 +28,7 @@ public class UserController(IUserService userService) : ControllerBase
         return Ok(result.Data);
     }
     [AllowAnonymous]
-    [HttpPost("auth/login")]
+    [HttpPost("login")]
     public async Task<IActionResult> LoginUserAsync([FromBody] LoginRequest loginRequest)
     {
         var result = await userService.LoginUserAsync(loginRequest);
@@ -46,7 +46,7 @@ public class UserController(IUserService userService) : ControllerBase
         return Ok(result.Data);
     }
     
-    [HttpPost("auth/login-2fa")]
+    [HttpPost("login-2fa")]
     public async Task<IActionResult> ValidateTwoFactorAuthLoginAsync([FromBody] GoogleAuthLoginRequest googleAuthLoginRequest)
     {
         var result = await userService.ValidateTwoFactorAuthLoginAsync(googleAuthLoginRequest);

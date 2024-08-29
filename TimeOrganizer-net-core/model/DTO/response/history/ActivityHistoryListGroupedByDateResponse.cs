@@ -2,7 +2,7 @@ using TimeOrganizer_net_core.model.DTO.response.generic;
 
 namespace TimeOrganizer_net_core.model.DTO.response.history;
 
-public record HistoryListGroupedByDateResponse(
+public record ActivityHistoryListGroupedByDateResponse(
     DateTime date,
-    List<HistoryResponse> historyResponseList
+    List<ActivityHistoryResponse> historyResponseList
 ) : IResponse;

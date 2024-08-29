@@ -4,16 +4,16 @@ using TimeOrganizer_net_core.repository.abs;
 
 namespace TimeOrganizer_net_core.repository;
 
-public interface IHistoryRepository : IEntityWithActivityRepository<History>
+public interface IActivityHistoryRepository : IEntityWithActivityRepository<ActivityHistory>
 {
-    IQueryable<History> applyFilters(long userId, HistoryFilterRequest filter);
+    IQueryable<ActivityHistory> applyFilters(long userId, ActivityHistoryFilterRequest filter);
 }
 
-public class HistoryRepository(AppDbContext context) : EntityWithActivityRepository<History>(context), IHistoryRepository
+public class ActivityHistoryRepository(AppDbContext context) : EntityWithActivityRepository<ActivityHistory>(context), IActivityHistoryRepository
 {
-    public IQueryable<History> applyFilters(long userId, HistoryFilterRequest filter)
+    public IQueryable<ActivityHistory> applyFilters(long userId, ActivityHistoryFilterRequest filter)
     {
-        var query = context.histories.AsQueryable();
+        var query = context.activityHistories.AsQueryable();
         query = query.Where(h => h.userId == userId);
 
         if (filter.activityId.HasValue)

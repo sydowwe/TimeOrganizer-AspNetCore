@@ -88,21 +88,21 @@ public class UserService(
     }
     public async Task<ServiceResult<LoginResponse>> LoginUserAsync(LoginRequest loginRequest)
     {
-        if (!await googleRecaptchaService.verifyRecaptchaAsync(loginRequest.recaptchaToken, "login"))
-        {
-            return ServiceResult<LoginResponse>.Error(
-                ServiceResultErrorType.BadRequest,
-                "Wrong captcha token or action"
-            );
-        }
+        // if (!await googleRecaptchaService.verifyRecaptchaAsync(loginRequest.recaptchaToken, "login"))
+        // {
+        //     return ServiceResult<LoginResponse>.Error(
+        //         ServiceResultErrorType.BadRequest,
+        //         "Wrong captcha token or action"
+        //     );
+        // }
         var userResult = await GetByEmailAsync(loginRequest.Email);
         if (!userResult.Success)
         {
             return ServiceResult<LoginResponse>.Error(userResult.ErrorType, userResult.ErrorMessage);
         }
-        var result = await signInManager.PasswordSignInAsync(loginRequest.Email, loginRequest.password,
-            loginRequest.stayLoggedIn, true);
         var user = userResult.Data;
+        var result = await signInManager.PasswordSignInAsync(user, loginRequest.password,
+            loginRequest.stayLoggedIn, true);
         if (result.IsNotAllowed)
         {
             await userManager.AccessFailedAsync(user);
@@ -124,6 +124,7 @@ public class UserService(
         user.isStayLoggedIn = loginRequest.stayLoggedIn;
         user.currentLocale = loginRequest.currentLocale;
         user.timezone = TimeZoneInfo.FindSystemTimeZoneById(loginRequest.Timezone);
+        //TODO robi zbytocne query na username treba odstranit
         await userManager.UpdateAsync(user);
         return ServiceResult<LoginResponse>.Successful(
             new LoginResponse
@@ -314,6 +315,10 @@ public class UserService(
         await roleService.createDefaultItems(userId);
     }
 
+    private async Task SendConfirmationEmail(User user)
+    {
+        
+    }
     private static byte[] GenerateQrCode(string secretKey, string userEmail)
     {
         var appName = Environment.GetEnvironmentVariable("APP_NAME") ??

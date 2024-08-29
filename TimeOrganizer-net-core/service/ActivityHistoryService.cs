@@ -10,24 +10,24 @@ using TimeOrganizer_net_core.service.abs;
 
 namespace TimeOrganizer_net_core.service;
 
-public interface IHistoryService : IEntityWithActivityService<History, HistoryRequest, HistoryResponse>
+public interface IActivityHistoryService : IEntityWithActivityService<ActivityHistory, ActivityHistoryRequest, ActivityHistoryResponse>
 {
-    Task<List<HistoryListGroupedByDateResponse>> filterAsync(HistoryFilterRequest filterRequest);
+    Task<List<ActivityHistoryListGroupedByDateResponse>> filterAsync(ActivityHistoryFilterRequest filterRequest);
 }
 
-public class HistoryService(IHistoryRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
-    : MyService<History, HistoryRequest, HistoryResponse, IHistoryRepository>(repository, loggedUserService, mapper), IHistoryService
+public class ActivityHistoryService(IActivityHistoryRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
+    : MyService<ActivityHistory, ActivityHistoryRequest, ActivityHistoryResponse, IActivityHistoryRepository>(repository, loggedUserService, mapper), IActivityHistoryService
 {
-       public async Task<List<HistoryListGroupedByDateResponse>> filterAsync(HistoryFilterRequest filterRequest)
+       public async Task<List<ActivityHistoryListGroupedByDateResponse>> filterAsync(ActivityHistoryFilterRequest filterRequest)
     {
         var query = Repository.applyFilters(loggedUserService.GetLoggedUserId(), filterRequest);
 
         var historyResponses = await query.OrderBy(h=>h.startTimestamp)
-            .ProjectTo<HistoryResponse>(Mapper.ConfigurationProvider).ToListAsync();
+            .ProjectTo<ActivityHistoryResponse>(Mapper.ConfigurationProvider).ToListAsync();
 
         return historyResponses
             .GroupBy(hr => hr.startTimestamp.ToUniversalTime().Date)
-            .Select(group => new HistoryListGroupedByDateResponse(group.Key, group.OrderBy(h=>h.startTimestamp).ToList()))
+            .Select(group => new ActivityHistoryListGroupedByDateResponse(group.Key, group.OrderBy(h=>h.startTimestamp).ToList()))
             .OrderBy(response => response.date)
             .ToList();
     }

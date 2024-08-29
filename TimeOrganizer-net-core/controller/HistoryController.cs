@@ -11,6 +11,6 @@ namespace TimeOrganizer_net_core.controller;
 
 [ApiController]
 [Route("[controller]")]
-public class HistoryController(IHistoryService service) : AbstractWithActivityController<History, HistoryRequest, HistoryResponse, IHistoryService>(service)
+public class HistoryController(IActivityHistoryService service) : AbstractWithActivityController<ActivityHistory, ActivityHistoryRequest, ActivityHistoryResponse, IActivityHistoryService>(service)
 {
 }

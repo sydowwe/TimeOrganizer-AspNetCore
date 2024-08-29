@@ -14,7 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ILoggedUserSer
     public DbSet<Alarm> alarms { get; set; }
     public DbSet<Category> categories { get; set; }
     public DbSet<Role> roles { get; set; }
-    public DbSet<History> histories { get; set; }
+    public DbSet<ActivityHistory> activityHistories { get; set; }
     public DbSet<PlannerTask> plannerTasks { get; set; }
     public DbSet<RoutineToDoList> routineToDoLists { get; set; }
     public DbSet<RoutineTimePeriod> routineTimePeriods { get; set; }

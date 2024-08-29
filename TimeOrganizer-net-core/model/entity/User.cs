@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -34,10 +35,25 @@ public class User : IdentityUser<long>
     // Navigation properties for related entities
     public virtual ICollection<Activity> activityList { get; set; } = new List<Activity>();
     public virtual ICollection<Category> categoryList { get; set; } = new List<Category>();
-    public virtual ICollection<History> historyList { get; set; } = new List<History>();
+    public virtual ICollection<ActivityHistory> historyList { get; set; } = new List<ActivityHistory>();
     public virtual ICollection<Role> roleList { get; set; } = new List<Role>();
     public virtual ICollection<ToDoList> toDoListList { get; set; } = new List<ToDoList>();
     public virtual ICollection<TaskUrgency> taskUrgencyList { get; set; } = new List<TaskUrgency>();
+    
+    
+    // [NotMapped]
+    // public override string? UserName
+    // {
+    //     get => Email;
+    //     set { } 
+    // }
+    //
+    // [NotMapped]
+    // public override string? NormalizedUserName
+    // {
+    //     get => NormalizedEmail;
+    //     set { } 
+    // }
 }
 
 public class UserConfiguration : IEntityTypeConfiguration<User>

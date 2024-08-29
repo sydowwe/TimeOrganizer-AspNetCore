@@ -5,11 +5,11 @@ using TimeOrganizer_net_core.model.entity;
 
 namespace TimeOrganizer_net_core.model.DTO.mapper;
 
-public class HistoryProfile : Profile
+public class ActivityHistoryProfile : Profile
 {
-    public HistoryProfile()
+    public ActivityHistoryProfile()
     {
-        CreateMap<HistoryRequest, History>();
-        CreateMap<History, HistoryResponse>();
+        CreateMap<ActivityHistoryRequest, ActivityHistory>();
+        CreateMap<ActivityHistory, ActivityHistoryResponse>();
     }
 }
