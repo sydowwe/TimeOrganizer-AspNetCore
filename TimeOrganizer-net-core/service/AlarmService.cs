@@ -11,16 +11,16 @@ namespace TimeOrganizer_net_core.service;
 
 public interface IAlarmService : IEntityWithActivityService<Alarm, AlarmRequest, AlarmResponse>
 {
-    Task setIsActive(IEnumerable<IdRequest> requestList);
+    Task SetIsActive(IEnumerable<IdRequest> requestList);
 }
 
 public class AlarmService(IAlarmRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
     : MyService<Alarm, AlarmRequest, AlarmResponse, IAlarmRepository>(repository, loggedUserService, mapper), IAlarmService
 {
-    public async Task setIsActive(IEnumerable<IdRequest> requestList)
+    public async Task SetIsActive(IEnumerable<IdRequest> requestList)
     {
-        var ids = requestList.Select(req => req.id);
-        var affectedRows = await Repository.updateIsActiveByIds(ids);
+        var ids = requestList.Select(req => req.Id);
+        var affectedRows = await repository.UpdateIsActiveByIds(ids);
         if (affectedRows <= 0)
         {
             //throw new UpdateFailedException();

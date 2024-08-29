@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 public class Role : AbstractAbstractNameTextColorEntity
 {
     // public string icon { get; set; }
-    public virtual ICollection<Activity> activities { get; set; } = new List<Activity>();
+    public virtual ICollection<Activity> Activities { get; set; } = new List<Activity>();
 
     public Role() : base() {}
 
@@ -24,7 +24,7 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
     {
         builder.ToTable("Role", schema: "public");
 
-        builder.HasIndex(r => new { r.userId, r.name })
+        builder.HasIndex(r => new { userId = r.UserId, name = r.Name })
             .IsUnique();
     }
 }

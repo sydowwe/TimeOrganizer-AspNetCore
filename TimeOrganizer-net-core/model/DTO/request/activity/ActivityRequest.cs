@@ -4,8 +4,8 @@ namespace TimeOrganizer_net_core.model.DTO.request.activity;
 
 public class ActivityRequest : NameTextRequest
 {
-    public bool isOnToDoList { get; set; }
-    public bool isUnavoidable { get; set; }
-    public long roleId { get; set; }
-    public long? categoryId { get; set; }
+    public bool IsOnToDoList { get; set; }
+    public bool IsUnavoidable { get; set; }
+    public long RoleId { get; set; }
+    public long? CategoryId { get; set; }
 }

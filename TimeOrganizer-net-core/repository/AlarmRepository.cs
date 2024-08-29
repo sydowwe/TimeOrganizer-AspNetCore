@@ -5,19 +5,19 @@ namespace TimeOrganizer_net_core.repository;
 
 public interface IAlarmRepository: IEntityWithActivityRepository<Alarm>
 {
-    Task<int> updateIsActiveByIds(IEnumerable<long> ids);
+    Task<int> UpdateIsActiveByIds(IEnumerable<long> ids);
 }
 
 public class AlarmRepository(AppDbContext context) : EntityWithActivityRepository<Alarm>(context), IAlarmRepository
 {
-    public async Task<int> updateIsActiveByIds(IEnumerable<long> ids)
+    public async Task<int> UpdateIsActiveByIds(IEnumerable<long> ids)
     {
-        var alarms = context.alarms
-            .Where(alarm => ids.Contains(alarm.id))
+        var alarms = context.Alarms
+            .Where(alarm => ids.Contains(alarm.Id))
             .ToList();
         foreach (var alarm in alarms)
         {
-            alarm.isActive = !alarm.isActive;
+            alarm.IsActive = !alarm.IsActive;
         }
         return await context.SaveChangesAsync();
     }

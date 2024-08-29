@@ -5,7 +5,7 @@ namespace TimeOrganizer_net_core.model.DTO.response.history;
 
 public class ActivityHistoryResponse : WithActivityResponse
 {
-    public DateTime startTimestamp { get; set; }
-    public MyIntTime length { get; set; }
-    public DateTime endTimestamp { get; set; }
+    public DateTime StartTimestamp { get; set; }
+    public MyIntTime Length { get; set; }
+    public DateTime EndTimestamp { get; set; }
 }

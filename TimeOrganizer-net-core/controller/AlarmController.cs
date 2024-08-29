@@ -14,9 +14,9 @@ namespace TimeOrganizer_net_core.controller;
 public class AlarmController(IAlarmService service) : AbstractWithActivityController<Alarm, AlarmRequest, AlarmResponse, IAlarmService>(service)
 {
     [HttpPatch("change-active")]
-    public async Task<ActionResult<SuccessResponse>> changeActive([FromBody] IEnumerable<IdRequest> requestList)
+    public async Task<ActionResult<SuccessResponse>> ChangeActive([FromBody] IEnumerable<IdRequest> requestList)
     {
-        await service.setIsActive(requestList);
+        await service.SetIsActive(requestList);
         return Ok(new SuccessResponse("changed"));
     }
 }

@@ -5,7 +5,7 @@ namespace TimeOrganizer_net_core.model.DTO.request;
 
 public class AlarmRequest : NameTextColorRequest, IActivityIdRequest
 {
-    public DateTime startTimestamp { get; set; }
-    public long activityId { get; set; }
-    public bool isActive { get; set; }
+    public DateTime StartTimestamp { get; set; }
+    public long ActivityId { get; set; }
+    public bool IsActive { get; set; }
 }

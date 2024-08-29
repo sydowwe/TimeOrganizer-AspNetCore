@@ -4,6 +4,6 @@ namespace TimeOrganizer_net_core.model.DTO.request.ToDoList;
 
 public class TimePeriodRequest : TextColorRequest
 {
-    public int length { get; set; }
-    public bool isHiddenInView { get; set; }
+    public int Length { get; set; }
+    public bool IsHiddenInView { get; set; }
 }

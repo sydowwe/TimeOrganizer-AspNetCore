@@ -5,6 +5,6 @@ namespace TimeOrganizer_net_core.model.DTO.request.history;
 
 public class ActivityHistoryRequest : ActivityIdRequest
 {
-    public DateTime startTimestamp { get; set; }
-    public MyIntTime length { get; set; }
+    public DateTime StartTimestamp { get; set; }
+    public MyIntTime Length { get; set; }
 }

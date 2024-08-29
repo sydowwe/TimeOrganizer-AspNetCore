@@ -10,16 +10,16 @@ namespace TimeOrganizer_net_core.service;
 
 public interface IPlannerTaskService : IEntityWithIsDoneService<PlannerTask, PlannerTaskRequest, PlannerTaskResponse>
 {
-    Task<List<PlannerTaskResponse>> getAllByDateAndHourSpan(PlannerFilterRequest request);
+    Task<List<PlannerTaskResponse>> GetAllByDateAndHourSpan(PlannerFilterRequest request);
 }
 
 public class PlannerTaskService(IPlannerTaskRepository repository,IActivityService activityService, ILoggedUserService loggedUserService, IMapper mapper)
     : EntityWithIsDoneService<PlannerTask, PlannerTaskRequest, PlannerTaskResponse, IPlannerTaskRepository>(repository, activityService, loggedUserService, mapper), IPlannerTaskService
 {
-    public async Task<List<PlannerTaskResponse>> getAllByDateAndHourSpan(PlannerFilterRequest request)
+    public async Task<List<PlannerTaskResponse>> GetAllByDateAndHourSpan(PlannerFilterRequest request)
     {
-        var endDate = request.filterDate.AddSeconds(request.hourSpan * 3600);
-        var tasks = await Repository.getAllByDateAndHourSpan(loggedUserService.GetLoggedUserId(), request.filterDate, endDate);
-        return Mapper.Map<List<PlannerTaskResponse>>(tasks);
+        var endDate = request.FilterDate.AddSeconds(request.HourSpan * 3600);
+        var tasks = await repository.GetAllByDateAndHourSpan(loggedUserService.GetLoggedUserId(), request.FilterDate, endDate);
+        return mapper.Map<List<PlannerTaskResponse>>(tasks);
     }
 };

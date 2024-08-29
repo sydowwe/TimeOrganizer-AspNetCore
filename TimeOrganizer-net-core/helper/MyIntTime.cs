@@ -4,23 +4,23 @@ namespace TimeOrganizer_net_core.helper;
 
 public class MyIntTime
 {
-    public int hours { get;  }
-    public int minutes { get; }
-    public int seconds { get; }
+    public int Hours { get;  }
+    public int Minutes { get; }
+    public int Seconds { get; }
     public MyIntTime(int seconds)
     {
-        this.hours = seconds / 3600;
-        this.minutes = (seconds % 3600) / 60;
-        this.seconds = seconds % 60;
+        this.Hours = seconds / 3600;
+        this.Minutes = (seconds % 3600) / 60;
+        this.Seconds = seconds % 60;
     }
 
-    public int getInSeconds()
+    public int GetInSeconds()
     {
-        return hours * 3600 + minutes * 60 + seconds;
+        return Hours * 3600 + Minutes * 60 + Seconds;
     }
 }
 
 public class MyIntTimeConverter() : ValueConverter<MyIntTime, int>(
-    myIntTime => myIntTime.getInSeconds(),
+    myIntTime => myIntTime.GetInSeconds(),
     seconds => new MyIntTime(seconds)
 );

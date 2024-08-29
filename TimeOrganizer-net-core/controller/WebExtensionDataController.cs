@@ -16,22 +16,22 @@ namespace TimeOrganizer_net_core.controller;
 public class WebExtensionDataController(IWebExtensionDataService service) : AbstractWithActivityController<WebExtensionData,WebExtensionDataRequest,WebExtensionDataResponse,IWebExtensionDataService>(service)
 {
     [NonAction]
-    public override Task<ActionResult<WebExtensionDataResponse>> get(long id)
+    public override Task<ActionResult<WebExtensionDataResponse>> Get(long id)
     {
         return null;
     }
     [NonAction]
-    public override Task<ActionResult<WebExtensionDataResponse>> update(long id, WebExtensionDataRequest request)
+    public override Task<ActionResult<WebExtensionDataResponse>> Update(long id, WebExtensionDataRequest request)
     {
         return null;
     }
     [NonAction]
-    public override  Task<ActionResult<IdResponse>> delete(long id)
+    public override  Task<ActionResult<IdResponse>> Delete(long id)
     {
         return null;
     }
     [NonAction]
-    public override Task<ActionResult<SuccessResponse>> batchDelete(List<IdRequest> request)
+    public override Task<ActionResult<SuccessResponse>> BatchDelete(List<IdRequest> request)
     {
         return null;
     }

@@ -16,47 +16,47 @@ public abstract class AbstractCrudController<TEntity, TRequest, TResponse, TServ
     protected readonly TService service = service;
 
     [HttpPost("get-all")]
-    public virtual async Task<ActionResult<IEnumerable<TResponse>>> getAll()
+    public virtual async Task<ActionResult<IEnumerable<TResponse>>> GetAll()
     {
-        return Ok(await service.getAllAsync());
+        return Ok(await service.GetAllAsync());
     }
     [HttpPost("get-all-options")]
-    public virtual async Task<ActionResult<IEnumerable<TResponse>>> getAllOptions()
+    public virtual async Task<ActionResult<IEnumerable<TResponse>>> GetAllOptions()
     {
-        return Ok(await service.getAllAsOptionsAsync());
+        return Ok(await service.GetAllAsOptionsAsync());
     }
 
     [HttpGet("{id:long}")]
-    public virtual async Task<ActionResult<TResponse>> get(long id)
+    public virtual async Task<ActionResult<TResponse>> Get(long id)
     {
-        var response = await service.getByIdAsync(id);
+        var response = await service.GetByIdAsync(id);
         if (response == null)
             return NotFound();
         return Ok(response);
     }
 
     [HttpPost("create")]
-    public virtual async Task<ActionResult<TResponse>> create(TRequest request)
+    public virtual async Task<ActionResult<TResponse>> Create(TRequest request)
     {
-        var newItem = await service.insertAsync(request);
-        return CreatedAtAction(nameof(get), new { newItem.id }, newItem);
+        var newItem = await service.InsertAsync(request);
+        return CreatedAtAction(nameof(Get), new { id = newItem.Id }, newItem);
     }
 
     [HttpPut("{id:long}")]
-    public virtual async Task<ActionResult<TResponse>> update(long id, TRequest request)
+    public virtual async Task<ActionResult<TResponse>> Update(long id, TRequest request)
     {
-        var updatedItem = await service.updateAsync(id, request);
+        var updatedItem = await service.UpdateAsync(id, request);
         if (updatedItem == null)
             return NotFound();
         return Ok(updatedItem);
     }
 
     [HttpDelete("{id:long}")]
-    public virtual async Task<ActionResult<IdResponse>> delete(long id)
+    public virtual async Task<ActionResult<IdResponse>> Delete(long id)
     {
         try
         {
-            await service.deleteAsync(id);
+            await service.DeleteAsync(id);
         }
         catch (Exception e)
         {
@@ -66,9 +66,9 @@ public abstract class AbstractCrudController<TEntity, TRequest, TResponse, TServ
         return Ok(new IdResponse(id));
     }
     [HttpPost("batch-delete")]
-    public virtual async Task<ActionResult<SuccessResponse>> batchDelete(List<IdRequest> request)
+    public virtual async Task<ActionResult<SuccessResponse>> BatchDelete(List<IdRequest> request)
     {
-        await service.batchDeleteAsync(request);
+        await service.BatchDeleteAsync(request);
         return Ok(new SuccessResponse("deleted"));
     }
 }

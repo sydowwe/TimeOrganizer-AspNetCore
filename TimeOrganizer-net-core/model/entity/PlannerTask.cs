@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public class PlannerTask : AbstractEntityWithIsDone
 {
-    public DateTime startTimestamp { get; set; }
+    public DateTime StartTimestamp { get; set; }
     [Required]
-    public int minuteLength { get; set; }
-    public string color { get; set; }
+    public int MinuteLength { get; set; }
+    public string Color { get; set; }
 }
 public class PlannerTaskConfiguration : IEntityTypeConfiguration<PlannerTask>
 {
@@ -19,13 +19,7 @@ public class PlannerTaskConfiguration : IEntityTypeConfiguration<PlannerTask>
     {
         builder.ToTable("PlannerTask", schema: "public");
 
-        builder.HasIndex(p => new { p.userId, p.startTimestamp })
+        builder.HasIndex(p => new { userId = p.UserId, startTimestamp = p.StartTimestamp })
             .IsUnique();
-
-        // Configure the relationship
-        builder.HasOne(p => p.activity)
-            .WithMany()
-            .HasForeignKey(p => p.activityId)
-            .OnDelete(DeleteBehavior.Restrict); // Adjust cascade behavior as needed
     }
 }

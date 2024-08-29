@@ -6,5 +6,5 @@ namespace TimeOrganizer_net_core.model.DTO.request.generic;
 public class IdRequest : IRequest
 {
     [Required]
-    public long id { get; set; }
+    public long Id { get; set; }
 }

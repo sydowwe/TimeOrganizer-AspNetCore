@@ -13,15 +13,15 @@ namespace TimeOrganizer_net_core.controller;
 public class RoutineTimePeriodController(IRoutineTimePeriodService service) : AbstractCrudController<RoutineTimePeriod,TimePeriodRequest,TimePeriodResponse,IRoutineTimePeriodService>(service)
 {
     [HttpPost("create-defaults")]
-    public async Task<ActionResult<IEnumerable<TimePeriodResponse>>> createDefaults()
+    public async Task<ActionResult<IEnumerable<TimePeriodResponse>>> CreateDefaults()
     {
-        await service.createDefaultItems(0);
+        await service.CreateDefaultItems(0);
         return Ok("ok");
     }
     [HttpPost("change-is-hidden/{id:long}")]
-    public async Task<ActionResult<SuccessResponse>> changeIsHidden(long id)
+    public async Task<ActionResult<SuccessResponse>> ChangeIsHidden(long id)
     {
-        await service.changeIsHiddenInViewAsync(id);
+        await service.ChangeIsHiddenInViewAsync(id);
         return Ok(new SuccessResponse("hidden changed"));
     }
 }

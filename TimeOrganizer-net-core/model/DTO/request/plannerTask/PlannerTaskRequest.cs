@@ -6,6 +6,6 @@ namespace TimeOrganizer_net_core.model.DTO.request.plannerTask;
 
 public class PlannerTaskRequest : WithIsDoneRequest
 {
-    public DateTime startTimestamp { get; set; }
-    public int minuteLength { get; set; }
+    public DateTime StartTimestamp { get; set; }
+    public int MinuteLength { get; set; }
 }

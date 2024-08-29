@@ -4,5 +4,5 @@ namespace TimeOrganizer_net_core.model.DTO.response.extendable;
 
 public class WithIsDoneResponse : WithActivityResponse
 {
-    public bool isDone { get; set; }
+    public bool IsDone { get; set; }
 }

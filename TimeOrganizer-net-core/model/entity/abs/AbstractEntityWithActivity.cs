@@ -7,11 +7,9 @@ namespace TimeOrganizer_net_core.model.entity.abs;
 
 public abstract class AbstractEntityWithActivity : AbstractEntityWithUser
 {
-    [ForeignKey(nameof(activityId))]
-    public virtual Activity activity { get; set; }
+    public virtual Activity Activity { get; set; }
 
-    [Required]
-    public long activityId { get; set; }
+    public long ActivityId { get; set; }
 
     protected AbstractEntityWithActivity()
     {
@@ -19,5 +17,16 @@ public abstract class AbstractEntityWithActivity : AbstractEntityWithUser
 
     protected AbstractEntityWithActivity(long userId) : base(userId)
     {
+    }
+}
+public class AbstractEntityWithActivityConfiguration : IEntityTypeConfiguration<AbstractEntityWithActivity>
+{
+    public void Configure(EntityTypeBuilder<AbstractEntityWithActivity> builder)
+    {
+        builder.HasOne(p => p.Activity)
+            .WithMany()
+            .HasForeignKey(p => p.ActivityId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict); // Adjust cascade behavior as needed
     }
 }

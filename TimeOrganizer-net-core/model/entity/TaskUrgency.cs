@@ -8,17 +8,17 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public class TaskUrgency : AbstractEntityWithUser
 {
-    public string text { get; set; }
-    public string color { get; set; }
-    public int priority { get; set; }
+    public string Text { get; set; }
+    public string Color { get; set; }
+    public int Priority { get; set; }
 
-    public ICollection<ToDoList> toDoListItems { get; set; } = new List<ToDoList>();
+    public ICollection<ToDoList> ToDoListItems { get; set; } = new List<ToDoList>();
 
     public TaskUrgency(long userId, string text, string color, int priority) : base(userId)
     {
-        this.text = text;
-        this.color = color;
-        this.priority = priority;
+        this.Text = text;
+        this.Color = color;
+        this.Priority = priority;
     }
 }
 public class TaskUrgencyConfiguration : IEntityTypeConfiguration<TaskUrgency>
@@ -28,16 +28,16 @@ public class TaskUrgencyConfiguration : IEntityTypeConfiguration<TaskUrgency>
         builder.ToTable("TaskUrgency", schema: "public");
 
         // Define unique constraints
-        builder.HasIndex(t => new { t.userId, t.text })
+        builder.HasIndex(t => new { userId = t.UserId, text = t.Text })
             .IsUnique();
 
-        builder.HasIndex(t => new { t.userId, t.priority })
+        builder.HasIndex(t => new { userId = t.UserId, priority = t.Priority })
             .IsUnique();
 
         // Configure the relationship
-        builder.HasMany(t => t.toDoListItems)
-            .WithOne(tl => tl.taskUrgency)
-            .HasForeignKey(tl => tl.taskUrgencyId)
+        builder.HasMany(t => t.ToDoListItems)
+            .WithOne(tl => tl.TaskUrgency)
+            .HasForeignKey(tl => tl.TaskUrgencyId)
             .OnDelete(DeleteBehavior.Restrict); // Adjust cascade behavior as needed
     }
 }

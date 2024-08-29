@@ -10,56 +10,46 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 public class Activity : AbstractNameTextEntity
 {
     [Required]
-    public bool isOnToDoList { get; set; }
+    public bool IsOnToDoList { get; set; }
 
     [Required]
-    public bool isUnavoidable { get; set; }
+    public bool IsUnavoidable { get; set; }
 
     [Required]
-    [ForeignKey(nameof(roleId))]
-    public virtual Role role { get; set; }
+    [ForeignKey(nameof(RoleId))]
+    public virtual Role Role { get; set; }
 
     [Required]
-    public long roleId { get; set; }
+    public long RoleId { get; set; }
 
-    [ForeignKey(nameof(categoryId))]
-    public virtual Category category { get; set; }
+    [ForeignKey(nameof(CategoryId))]
+    public virtual Category Category { get; set; }
 
-    public long? categoryId { get; set; }
+    public long? CategoryId { get; set; }
 
     // public virtual ICollection<Alarm> alarmList { get; set; } = new List<Alarm>();
-    public virtual ICollection<ActivityHistory> historyList { get; set; } = new List<ActivityHistory>();
-    public virtual ICollection<WebExtensionData> webExtensionDataList { get; set; } = new List<WebExtensionData>();
+    public virtual ICollection<ActivityHistory> HistoryList { get; set; } = new List<ActivityHistory>();
+    public virtual ICollection<WebExtensionData> WebExtensionDataList { get; set; } = new List<WebExtensionData>();
 }
 public class ActivityConfiguration : IEntityTypeConfiguration<Activity>
 {
     public void Configure(EntityTypeBuilder<Activity> builder)
     {
         builder.ToTable("Activity", schema: "public");
-
-        builder.HasOne(a => a.role)
-            .WithMany()
-            .HasForeignKey(a => a.roleId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(a => a.category)
-            .WithMany()
-            .HasForeignKey(a => a.categoryId)
-            .OnDelete(DeleteBehavior.SetNull);
         
         // builder.HasMany(a => a.alarmList)
         //     .WithOne(w=>w.activity)
         //     .HasForeignKey(w=>w.activityId)
         //     .OnDelete(DeleteBehavior.SetNull);
         
-        builder.HasMany(a => a.historyList)
-            .WithOne(h=>h.activity)
-            .HasForeignKey(h=>h.activityId)
+        builder.HasMany(a => a.HistoryList)
+            .WithOne(h=>h.Activity)
+            .HasForeignKey(h=>h.ActivityId)
             .OnDelete(DeleteBehavior.SetNull);
         
-        builder.HasMany(a => a.webExtensionDataList)
-            .WithOne(w=>w.activity)
-            .HasForeignKey(w=>w.activityId)
+        builder.HasMany(a => a.WebExtensionDataList)
+            .WithOne(w=>w.Activity)
+            .HasForeignKey(w=>w.ActivityId)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }

@@ -8,10 +8,10 @@ namespace TimeOrganizer_net_core.model.entity.abs;
 public abstract class AbstractEntityWithUser : AbstractEntity
 {
     [Required]
-    public long userId { get; set; }
+    public long UserId { get; set; }
 
-    [ForeignKey(nameof(userId))]
-    public virtual User user { get; set; }
+    [ForeignKey(nameof(UserId))]
+    public virtual User User { get; set; }
 
     protected AbstractEntityWithUser()
     {
@@ -19,6 +19,6 @@ public abstract class AbstractEntityWithUser : AbstractEntity
 
     protected AbstractEntityWithUser(long userId)
     {
-        this.userId = userId;
+        this.UserId = userId;
     }
 }

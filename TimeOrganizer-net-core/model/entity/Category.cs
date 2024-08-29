@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public class Category : AbstractAbstractNameTextColorEntity
 {
-    public virtual ICollection<Activity> activities { get; set; } = new List<Activity>();
+    public virtual ICollection<Activity> Activities { get; set; } = new List<Activity>();
 
     // public string icon { get; set; }
 }
@@ -18,7 +18,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
     {
         builder.ToTable("Category", schema: "public");
 
-        builder.HasIndex(r => new { r.userId, r.name })
+        builder.HasIndex(r => new { userId = r.UserId, name = r.Name })
             .IsUnique();
     }
 }

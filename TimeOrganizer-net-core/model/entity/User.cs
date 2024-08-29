@@ -10,35 +10,35 @@ using System.ComponentModel.DataAnnotations;
 
 public enum AvailableLocales
 {
-    EN,
-    SK,
-    CZ
+    En,
+    Sk,
+    Cz
 }
 
 public class User : IdentityUser<long>
 {
     // Name
-    [Required] public string name { get; set; }
+    [Required] public string Name { get; set; }
 
     // Surname
-    [Required] public string surname { get; set; }
+    [Required] public string Surname { get; set; }
 
     // Stay Logged In
-    [Required] public bool isStayLoggedIn { get; set; }
+    [Required] public bool IsStayLoggedIn { get; set; }
 
     // Current Locale
-    [Required] public AvailableLocales currentLocale { get; set; } = AvailableLocales.SK;
+    [Required] public AvailableLocales CurrentLocale { get; set; } = AvailableLocales.Sk;
 
     // Timezone
-    [Required] public TimeZoneInfo timezone { get; set; } // Assuming ZoneIdDBConverter is for ZoneId, store as string
+    [Required] public TimeZoneInfo Timezone { get; set; } // Assuming ZoneIdDBConverter is for ZoneId, store as string
     
     // Navigation properties for related entities
-    public virtual ICollection<Activity> activityList { get; set; } = new List<Activity>();
-    public virtual ICollection<Category> categoryList { get; set; } = new List<Category>();
-    public virtual ICollection<ActivityHistory> historyList { get; set; } = new List<ActivityHistory>();
-    public virtual ICollection<Role> roleList { get; set; } = new List<Role>();
-    public virtual ICollection<ToDoList> toDoListList { get; set; } = new List<ToDoList>();
-    public virtual ICollection<TaskUrgency> taskUrgencyList { get; set; } = new List<TaskUrgency>();
+    public virtual ICollection<Activity> ActivityList { get; set; } = new List<Activity>();
+    public virtual ICollection<Category> CategoryList { get; set; } = new List<Category>();
+    public virtual ICollection<ActivityHistory> ActivityHistoryList { get; set; } = new List<ActivityHistory>();
+    public virtual ICollection<Role> RoleList { get; set; } = new List<Role>();
+    public virtual ICollection<ToDoList> ToDoListList { get; set; } = new List<ToDoList>();
+    public virtual ICollection<TaskUrgency> TaskUrgencyList { get; set; } = new List<TaskUrgency>();
     
     
     // [NotMapped]
@@ -68,11 +68,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.Email).IsUnique(); // Unique constraint on Email
 
         // Property configurations
-        builder.Property(u => u.name)
+        builder.Property(u => u.Name)
             .IsRequired()
             .HasMaxLength(100); // Adjust length as needed
 
-        builder.Property(u => u.surname)
+        builder.Property(u => u.Surname)
             .IsRequired()
             .HasMaxLength(100); // Adjust length as needed
 
@@ -83,50 +83,50 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.PasswordHash)
             .IsRequired();
 
-        builder.Property(u => u.isStayLoggedIn)
+        builder.Property(u => u.IsStayLoggedIn)
             .IsRequired();
 
 
 
-        builder.Property(u => u.currentLocale)
+        builder.Property(u => u.CurrentLocale)
             .HasConversion(
                 v => v.ToString(),
                 v => (AvailableLocales)Enum.Parse(typeof(AvailableLocales), v))
             .IsRequired();
         // Time zone conversion
-        builder.Property(u => u.timezone)
+        builder.Property(u => u.Timezone)
             .HasConversion(tz => tz.Id,
                 id => TimeZoneInfo.FindSystemTimeZoneById(id));
         
         // Relationships
-        builder.HasMany(u => u.activityList)
-            .WithOne(a => a.user)
-            .HasForeignKey(a => a.userId)
+        builder.HasMany(u => u.ActivityList)
+            .WithOne(a => a.User)
+            .HasForeignKey(a => a.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(u => u.categoryList)
-            .WithOne(c => c.user)
-            .HasForeignKey(c => c.userId)
+        builder.HasMany(u => u.CategoryList)
+            .WithOne(c => c.User)
+            .HasForeignKey(c => c.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(u => u.historyList)
-            .WithOne(h => h.user)
-            .HasForeignKey(h => h.userId)
+        builder.HasMany(u => u.ActivityHistoryList)
+            .WithOne(h => h.User)
+            .HasForeignKey(h => h.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(u => u.roleList)
-            .WithOne(r => r.user)
-            .HasForeignKey(r => r.userId)
+        builder.HasMany(u => u.RoleList)
+            .WithOne(r => r.User)
+            .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(u => u.toDoListList)
-            .WithOne(t => t.user)
-            .HasForeignKey(t => t.userId)
+        builder.HasMany(u => u.ToDoListList)
+            .WithOne(t => t.User)
+            .HasForeignKey(t => t.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(u => u.taskUrgencyList)
-            .WithOne(t => t.user)
-            .HasForeignKey(t => t.userId)
+        builder.HasMany(u => u.TaskUrgencyList)
+            .WithOne(t => t.User)
+            .HasForeignKey(t => t.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         

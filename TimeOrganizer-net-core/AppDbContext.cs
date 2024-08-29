@@ -10,17 +10,17 @@ using Microsoft.EntityFrameworkCore;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options, ILoggedUserService loggedUserService) : IdentityDbContext<User, UserRole, long>(options)
 {
-    public DbSet<Activity> activities { get; set; }
-    public DbSet<Alarm> alarms { get; set; }
-    public DbSet<Category> categories { get; set; }
-    public DbSet<Role> roles { get; set; }
-    public DbSet<ActivityHistory> activityHistories { get; set; }
-    public DbSet<PlannerTask> plannerTasks { get; set; }
-    public DbSet<RoutineToDoList> routineToDoLists { get; set; }
-    public DbSet<RoutineTimePeriod> routineTimePeriods { get; set; }
-    public DbSet<ToDoList> toDoLists { get; set; }
-    public DbSet<TaskUrgency> taskUrgencies { get; set; }
-    public DbSet<WebExtensionData> webExtensionData { get; set; }
+    public DbSet<Activity> Activities { get; set; }
+    public DbSet<Alarm> Alarms { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Role> Role { get; set; }
+    public DbSet<ActivityHistory> ActivityHistories { get; set; }
+    public DbSet<PlannerTask> PlannerTasks { get; set; }
+    public DbSet<RoutineToDoList> RoutineToDoLists { get; set; }
+    public DbSet<RoutineTimePeriod> RoutineTimePeriods { get; set; }
+    public DbSet<ToDoList> ToDoLists { get; set; }
+    public DbSet<TaskUrgency> TaskUrgencies { get; set; }
+    public DbSet<WebExtensionData> WebExtensionData { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -31,7 +31,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ILoggedUserSer
         modelBuilder.ApplyConfiguration(new ActivityConfiguration());
         modelBuilder.ApplyConfiguration(new CategoryConfiguration());
         modelBuilder.ApplyConfiguration(new RoleConfiguration());
-        modelBuilder.ApplyConfiguration(new HistoryConfiguration());
+        modelBuilder.ApplyConfiguration(new ActivityHistoryConfiguration());
         modelBuilder.ApplyConfiguration(new PlannerTaskConfiguration());
         modelBuilder.ApplyConfiguration(new RoutineToDoListConfiguration());
         modelBuilder.ApplyConfiguration(new ToDoListConfiguration());
@@ -63,14 +63,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ILoggedUserSer
     {
         foreach (var entry in ChangeTracker.Entries<AbstractEntity>())
         {
-            if (entry.State == EntityState.Added)
+            switch (entry.State)
             {
-                entry.Entity.createdTimestamp = DateTime.UtcNow;
-            }
-
-            if (entry.State == EntityState.Modified)
-            {
-                entry.Entity.modifiedTimestamp = DateTime.UtcNow;
+                case EntityState.Added:
+                    entry.Entity.CreatedTimestamp = DateTime.UtcNow;
+                    break;
+                case EntityState.Modified:
+                    entry.Entity.ModifiedTimestamp = DateTime.UtcNow;
+                    break;
             }
         }
         var userId = loggedUserService.GetLoggedUserId();
@@ -78,16 +78,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ILoggedUserSer
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.userId = userId;
+                entry.Entity.UserId = userId;
             }
         }
         return await base.SaveChangesAsync(cancellationToken);
-    }
-    private void ConfigureNameTextEntity<TEntity>(EntityTypeBuilder<TEntity> builder) 
-        where TEntity : AbstractNameTextEntity
-    {
-        builder.HasIndex(e => new { e.userId, e.name })
-            .IsUnique()
-            .HasDatabaseName($"{typeof(TEntity).Name.ToLower()}_unique_user_id_name");
     }
 }

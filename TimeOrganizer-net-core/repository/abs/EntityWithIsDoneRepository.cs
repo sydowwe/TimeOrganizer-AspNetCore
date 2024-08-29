@@ -5,20 +5,20 @@ namespace TimeOrganizer_net_core.repository.abs;
 
 public interface IEntityWithIsDoneRepository<T> : IEntityWithActivityRepository<T> where T : AbstractEntityWithIsDone
 {
-    Task<int> updateIsDoneByIdsAsync(IEnumerable<long> ids);
+    Task<int> UpdateIsDoneByIdsAsync(IEnumerable<long> ids);
 }
 
 public class EntityWithIsDoneRepository<T>(AppDbContext context) : EntityWithActivityRepository<T>(context), IEntityWithIsDoneRepository<T>
     where T : AbstractEntityWithIsDone
 {
-    public async Task<int> updateIsDoneByIdsAsync(IEnumerable<long> ids)
+    public async Task<int> UpdateIsDoneByIdsAsync(IEnumerable<long> ids)
     {
         var items = dbSet
-            .Where(item => ids.Contains(item.id))
+            .Where(item => ids.Contains(item.Id))
             .ToList();
         foreach (var item in items)
         {
-            item.isDone = !item.isDone;
+            item.IsDone = !item.IsDone;
         }
         return await context.SaveChangesAsync();
     }

@@ -7,5 +7,5 @@ namespace TimeOrganizer_net_core.repository.abs;
 public interface IStartAndLengthRepository<out TEntity>
     where TEntity : AbstractEntity
 {
-    Task<IEnumerable<AbstractEntity>> getAllByDateAndHourSpan(int userId, DateTime startDate, DateTime endDate);
+    Task<IEnumerable<AbstractEntity>> GetAllByDateAndHourSpan(int userId, DateTime startDate, DateTime endDate);
 }

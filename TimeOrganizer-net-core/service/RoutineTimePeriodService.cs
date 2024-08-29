@@ -10,16 +10,16 @@ namespace TimeOrganizer_net_core.service;
 
 public interface IRoutineTimePeriodService : IMyService<RoutineTimePeriod, TimePeriodRequest, TimePeriodResponse>
 {
-    Task createDefaultItems(long newUserId);
-    Task changeIsHiddenInViewAsync(long id);
+    Task CreateDefaultItems(long newUserId);
+    Task ChangeIsHiddenInViewAsync(long id);
 }
 
 public class RoutineTimePeriodService(IRoutineTimePeriodRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
     : MyService<RoutineTimePeriod, TimePeriodRequest, TimePeriodResponse,IRoutineTimePeriodRepository>(repository, loggedUserService, mapper), IRoutineTimePeriodService
 {
-    public async Task createDefaultItems(long newUserId)
+    public async Task CreateDefaultItems(long newUserId)
     {
-        await this.Repository.addRangeAsync(
+        await this.repository.AddRangeAsync(
             [
                 new RoutineTimePeriod(newUserId, "Daily", "#92F58C", 1, false),         // Green
                 new RoutineTimePeriod(newUserId, "Weekly", "#936AF1", 7, false),      // purple
@@ -29,8 +29,8 @@ public class RoutineTimePeriodService(IRoutineTimePeriodRepository repository, I
         );
     }
 
-    public async Task changeIsHiddenInViewAsync(long id)
+    public async Task ChangeIsHiddenInViewAsync(long id)
     {
-        await Repository.changeIsHiddenInViewAsync(id);
+        await repository.ChangeIsHiddenInViewAsync(id);
     }
 }

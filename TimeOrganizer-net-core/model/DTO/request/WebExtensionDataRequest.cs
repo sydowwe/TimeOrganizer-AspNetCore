@@ -4,8 +4,8 @@ namespace TimeOrganizer_net_core.model.DTO.request;
 
 public class WebExtensionDataRequest : ActivityIdRequest
 {
-    public string domain { get; set; }
-    public string title { get; set; }
-    public int duration { get; set; }
-    public DateTime startTimestamp { get; set; }
+    public string Domain { get; set; }
+    public string Title { get; set; }
+    public int Duration { get; set; }
+    public DateTime StartTimestamp { get; set; }
 }

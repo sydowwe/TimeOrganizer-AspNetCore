@@ -11,15 +11,15 @@ namespace TimeOrganizer_net_core.service;
 
 public interface IRoleService : IMyService<Role, NameTextColorIconRequest, NameTextColorIconResponse>
 {
-    Task createDefaultItems(long newUserId);
+    Task CreateDefaultItems(long newUserId);
 }
 
 public class RoleService(IRoleRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
     : MyService<Role, NameTextColorIconRequest, NameTextColorIconResponse,IRoleRepository>(repository, loggedUserService, mapper), IRoleService
 {
-    public async Task createDefaultItems(long newUserId)
+    public async Task CreateDefaultItems(long newUserId)
     {
-        await this.Repository.addRangeAsync(
+        await this.repository.AddRangeAsync(
             [
                 new Role(newUserId, "Planner task", "Quickly created activities in task planner", "", "calendar-days"),
                 new Role(newUserId, "To-do list task", "Quickly created activities in to-do list", "", "list-check"),

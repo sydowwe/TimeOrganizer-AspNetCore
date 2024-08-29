@@ -14,22 +14,22 @@ namespace TimeOrganizer_net_core.controller;
 public class TaskUrgencyController(ITaskUrgencyService service) : AbstractCrudController<TaskUrgency,TaskUrgencyRequest,TaskUrgencyResponse,ITaskUrgencyService>(service)
 {
     [NonAction]
-    public override Task<ActionResult<TaskUrgencyResponse>> create(TaskUrgencyRequest request)
+    public override Task<ActionResult<TaskUrgencyResponse>> Create(TaskUrgencyRequest request)
     {
         return null;
     }
     [NonAction]
-    public override Task<ActionResult<TaskUrgencyResponse>> update(long id, TaskUrgencyRequest request)
+    public override Task<ActionResult<TaskUrgencyResponse>> Update(long id, TaskUrgencyRequest request)
     {
         return null;
     }
     [NonAction]
-    public override  Task<ActionResult<IdResponse>> delete(long id)
+    public override  Task<ActionResult<IdResponse>> Delete(long id)
     {
         return null;
     }
     [NonAction]
-    public override Task<ActionResult<SuccessResponse>> batchDelete(List<IdRequest> request)
+    public override Task<ActionResult<SuccessResponse>> BatchDelete(List<IdRequest> request)
     {
         return null;
     }

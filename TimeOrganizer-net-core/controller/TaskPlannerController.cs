@@ -17,16 +17,16 @@ public class PlannerTaskController(IPlannerTaskService service)
    
     
     [HttpPatch("apply-filter")]
-    public async Task<ActionResult<SuccessResponse>> applyFilter(PlannerFilterRequest request)
+    public async Task<ActionResult<SuccessResponse>> ApplyFilter(PlannerFilterRequest request)
     {
-        await service.getAllByDateAndHourSpan(request);
+        await service.GetAllByDateAndHourSpan(request);
         return Ok(new SuccessResponse("changed"));
     }
     
     [HttpPatch("change-done")]
-    public async Task<ActionResult<SuccessResponse>> changeDone(List<IdRequest> requestList)
+    public async Task<ActionResult<SuccessResponse>> ChangeDone(List<IdRequest> requestList)
     {
-        await service.setIsDoneAsync(requestList);
+        await service.SetIsDoneAsync(requestList);
         return Ok(new SuccessResponse("changed"));
     }
 }

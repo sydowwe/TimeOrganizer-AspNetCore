@@ -9,18 +9,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public class RoutineTimePeriod : AbstractEntityWithUser
 {
-    public string text { get; set; }
-    public string color { get; set; }
-    public int lengthInDays { get; set; }
-    public bool isHiddenInView { get; set; }
-    public ICollection<RoutineToDoList> toDoListItems { get; set; } = new List<RoutineToDoList>();
+    public string Text { get; set; }
+    public string Color { get; set; }
+    public int LengthInDays { get; set; }
+    public bool IsHiddenInView { get; set; }
+    public ICollection<RoutineToDoList> ToDoListItems { get; set; } = new List<RoutineToDoList>();
 
     public RoutineTimePeriod(long userId, string text, string color, int lengthInDays, bool isHiddenInView) : base(userId)
     {
-        this.text = text;
-        this.color = color;
-        this.lengthInDays = lengthInDays;
-        this.isHiddenInView = isHiddenInView;
+        this.Text = text;
+        this.Color = color;
+        this.LengthInDays = lengthInDays;
+        this.IsHiddenInView = isHiddenInView;
     }
 }
 public class RoutineTimePeriodConfiguration : IEntityTypeConfiguration<RoutineTimePeriod>
@@ -30,13 +30,13 @@ public class RoutineTimePeriodConfiguration : IEntityTypeConfiguration<RoutineTi
         builder.ToTable("RoutineTimePeriod", schema: "public");
 
         // Define unique constraint on (user_id, text)
-        builder.HasIndex(r => new { r.userId, r.text })
+        builder.HasIndex(r => new { userId = r.UserId, text = r.Text })
             .IsUnique();
             
         // Configure the relationship
-        builder.HasMany(r => r.toDoListItems)
-            .WithOne(t => t.timePeriod)
-            .HasForeignKey(t => t.timePeriodId)
+        builder.HasMany(r => r.ToDoListItems)
+            .WithOne(t => t.TimePeriod)
+            .HasForeignKey(t => t.TimePeriodId)
             .OnDelete(DeleteBehavior.Restrict); // Adjust cascade behavior as needed
     }
 }

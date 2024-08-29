@@ -14,9 +14,9 @@ namespace TimeOrganizer_net_core.controller;
 public class ToDoListController(IToDoListService service) : AbstractWithActivityController<ToDoList,ToDoListRequest,ToDoListResponse,IToDoListService>(service)
 {
     [HttpPatch("change-done")]
-    public async Task<ActionResult<SuccessResponse>> changeDone(List<IdRequest> requestList)
+    public async Task<ActionResult<SuccessResponse>> ChangeDone(List<IdRequest> requestList)
     {
-        await service.setIsDoneAsync(requestList);
+        await service.SetIsDoneAsync(requestList);
         return Ok(new SuccessResponse("changed"));
     }
 }

@@ -15,7 +15,7 @@ public interface IEntityWithIsDoneService<TEntity, in TRequest, TResponse>
     where TRequest : WithIsDoneRequest
     where TResponse : WithIsDoneResponse
 {
-    Task setIsDoneAsync(IEnumerable<IdRequest> requestList);
+    Task SetIsDoneAsync(IEnumerable<IdRequest> requestList);
 }
 
 public abstract class EntityWithIsDoneService<TEntity, TRequest, TResponse, TRepository>(
@@ -31,10 +31,10 @@ public abstract class EntityWithIsDoneService<TEntity, TRequest, TResponse, TRep
     where TResponse : WithIsDoneResponse
     where TRepository : IEntityWithIsDoneRepository<TEntity>
 {
-    public async Task setIsDoneAsync(IEnumerable<IdRequest> requestList)
+    public async Task SetIsDoneAsync(IEnumerable<IdRequest> requestList)
     {
-        var ids = requestList.Select(req => req.id);
-        var affectedRows = await Repository.updateIsDoneByIdsAsync(ids);
+        var ids = requestList.Select(req => req.Id);
+        var affectedRows = await repository.UpdateIsDoneByIdsAsync(ids);
         if (affectedRows <= 0)
         {
             //throw new UpdateFailedException();

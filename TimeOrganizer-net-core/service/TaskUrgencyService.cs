@@ -10,15 +10,15 @@ namespace TimeOrganizer_net_core.service;
 
 public interface ITaskUrgencyService : IMyService<TaskUrgency, TaskUrgencyRequest, TaskUrgencyResponse>
 {
-    Task createDefaultItems(long newUserId);
+    Task CreateDefaultItems(long newUserId);
 }
 
 public class TaskUrgencyService(ITaskUrgencyRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
     : MyService<TaskUrgency, TaskUrgencyRequest, TaskUrgencyResponse, ITaskUrgencyRepository>(repository, loggedUserService, mapper), ITaskUrgencyService
 {
-    public async Task createDefaultItems(long newUserId)
+    public async Task CreateDefaultItems(long newUserId)
     {
-        await this.Repository.addRangeAsync(
+        await this.repository.AddRangeAsync(
             [
                 new TaskUrgency(newUserId, "Today", "#FF5252", 1),         // Red
                 new TaskUrgency(newUserId, "This week", "#FFA726", 2),      // Orange

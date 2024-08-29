@@ -11,30 +11,23 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 public class ActivityHistory : AbstractEntityWithActivity
 {
     [Required]
-    public DateTime startTimestamp { get; set; }
+    public DateTime StartTimestamp { get; set; }
 
     [Required]
     [Column(TypeName = "int")]
-    public MyIntTime length { get; set; }
+    public MyIntTime Length { get; set; }
 
     [Required]
-    public DateTime endTimestamp { get; set; }
+    public DateTime EndTimestamp { get; set; }
 }
-public class HistoryConfiguration : IEntityTypeConfiguration<ActivityHistory>
+public class ActivityHistoryConfiguration : IEntityTypeConfiguration<ActivityHistory>
 {
     public void Configure(EntityTypeBuilder<ActivityHistory> builder)
     {
-        builder.ToTable("History", schema: "public");
+        builder.ToTable("ActivityHistory", schema: "public");
+        builder.HasIndex(h => h.StartTimestamp);
 
-        // Define indexing if needed
-        builder.HasIndex(h => h.startTimestamp);
-
-        builder.Property(h => h.length)
+        builder.Property(h => h.Length)
             .HasConversion(new MyIntTimeConverter());
-        
-        builder.HasOne(a => a.activity)
-            .WithMany() // Specify if Activity has a collection to be navigated
-            .HasForeignKey(a => a.activityId)
-            .OnDelete(DeleteBehavior.SetNull); // Specify cascade behavior if needed
     }
 }

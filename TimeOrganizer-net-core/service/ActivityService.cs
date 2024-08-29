@@ -19,15 +19,15 @@ public class ActivityService(IActivityRepository repository, ILoggedUserService 
         IActivityService
 {
     //TODO make activityForm selects methods
-    public async Task<ActivityResponse> quickUpdateAsync(long id, NameTextRequest request)
+    public async Task<ActivityResponse> QuickUpdateAsync(long id, NameTextRequest request)
     {
-        var entity = await Repository.getByIdAsync(id);
+        var entity = await repository.GetByIdAsync(id);
         if (entity == null)
         {
             throw new KeyNotFoundException($"Entity with id {id} not found.");
         }
-        Mapper.Map(request, entity);
-        await Repository.updateAsync(entity);
-        return Mapper.Map<ActivityResponse>(entity);
+        mapper.Map(request, entity);
+        await repository.UpdateAsync(entity);
+        return mapper.Map<ActivityResponse>(entity);
     }
 }

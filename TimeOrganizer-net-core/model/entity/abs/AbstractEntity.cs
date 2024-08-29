@@ -8,17 +8,17 @@ public abstract class
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public long id { get; set; }
+    public long Id { get; set; }
 
     [Required]
-    public DateTime createdTimestamp { get; set; }
+    public DateTime CreatedTimestamp { get; set; }
 
     [Required]
-    public DateTime modifiedTimestamp { get; set; }
+    public DateTime ModifiedTimestamp { get; set; }
 
     protected AbstractEntity()
     {
-        createdTimestamp = DateTime.UtcNow;
-        modifiedTimestamp = DateTime.UtcNow;
+        CreatedTimestamp = DateTime.UtcNow;
+        ModifiedTimestamp = DateTime.UtcNow;
     }
 }

@@ -5,5 +5,5 @@ namespace TimeOrganizer_net_core.model.DTO.request.user;
 
 public class LocaleRequest : IRequest
 {
-    public AvailableLocales locale { get; set; }
+    public AvailableLocales Locale { get; set; }
 }

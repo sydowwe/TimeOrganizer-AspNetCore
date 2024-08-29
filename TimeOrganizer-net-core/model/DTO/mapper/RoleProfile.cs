@@ -12,6 +12,6 @@ public class RoleProfile : Profile
     {
         CreateMap<NameTextColorIconRequest, Role>();
         CreateMap<Role, NameTextColorIconResponse>();
-        CreateMap<Role, SelectOptionResponse>().ForMember(dest => dest.label, opt => opt.MapFrom(src => src.name));
+        CreateMap<Role, SelectOptionResponse>().ForMember(dest => dest.label, opt => opt.MapFrom(src => src.Name));
     }
 }

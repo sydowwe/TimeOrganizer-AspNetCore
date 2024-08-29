@@ -2,8 +2,8 @@ namespace TimeOrganizer_net_core.model.DTO.request.history;
 
 public class ActivityHistoryFilterRequest : ActivitySelectForm
 {
-    public DateTime? dateFrom { get; set; }
-    public DateTime? dateTo { get; set; }
-    public long? hoursBack { get; set; }
+    public DateTime? DateFrom { get; set; }
+    public DateTime? DateTo { get; set; }
+    public long? HoursBack { get; set; }
 }
 

@@ -7,8 +7,8 @@ namespace TimeOrganizer_net_core.model.entity;
 
 public class Alarm : AbstractEntityWithActivity
 {
-    public DateTime startTimestamp { get; set; }
-    public bool isActive { get; set; }
+    public DateTime StartTimestamp { get; set; }
+    public bool IsActive { get; set; }
 
     public Alarm()
     {
@@ -21,6 +21,6 @@ public class AlarmConfiguration : IEntityTypeConfiguration<Alarm>
         builder.ToTable("Alarm", schema: "public");
 
         // Define indexing if needed
-        builder.HasIndex(h => h.startTimestamp);
+        builder.HasIndex(h => h.StartTimestamp);
     }
 }

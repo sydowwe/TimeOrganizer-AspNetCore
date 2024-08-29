@@ -4,5 +4,5 @@ namespace TimeOrganizer_net_core.model.DTO.response.user;
 
 public class GoogleAuthResponse : IResponse
 {
-    public bool authorized { get; set; }    
+    public bool Authorized { get; set; }    
 }

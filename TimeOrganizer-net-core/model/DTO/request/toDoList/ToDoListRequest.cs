@@ -4,5 +4,5 @@ namespace TimeOrganizer_net_core.model.DTO.request.ToDoList;
 
 public class ToDoListRequest : WithIsDoneRequest
 {
-    public long urgencyId { get; set; }
+    public long UrgencyId { get; set; }
 }

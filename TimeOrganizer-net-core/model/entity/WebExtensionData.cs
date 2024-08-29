@@ -7,12 +7,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public class WebExtensionData : AbstractEntityWithActivity
 {
-    public string domain { get; set; }
-    public string title { get; set; }
-    public int duration { get; set; }
-    public DateTime startTimestamp { get; set; }
-
- 
+    public string Domain { get; set; }
+    public string Title { get; set; }
+    public int Duration { get; set; }
+    public DateTime StartTimestamp { get; set; }
 }
 public class WebExtensionDataConfiguration : IEntityTypeConfiguration<WebExtensionData>
 {
@@ -21,7 +19,7 @@ public class WebExtensionDataConfiguration : IEntityTypeConfiguration<WebExtensi
         builder.ToTable("WebExtensionData", schema: "public");
 
         // Define unique constraint on (user_id, domain)
-        builder.HasIndex(w => new { w.userId, w.domain })
+        builder.HasIndex(w => new { userId = w.UserId, domain = w.Domain })
             .IsUnique();
     }
 }

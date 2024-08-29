@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 public class ToDoList : AbstractEntityWithIsDone
 {
     [ForeignKey("taskUrgencyId")]
-    public virtual TaskUrgency taskUrgency { get; set; }
-    public long taskUrgencyId { get; set; }
+    public virtual TaskUrgency TaskUrgency { get; set; }
+    public long TaskUrgencyId { get; set; }
 }
 public class ToDoListConfiguration : IEntityTypeConfiguration<ToDoList>
 {
@@ -19,15 +19,15 @@ public class ToDoListConfiguration : IEntityTypeConfiguration<ToDoList>
         builder.ToTable("ToDoList", schema: "public");
 
         // Define unique constraint on (user_id, activity_id)
-        builder.HasIndex(t => new { t.userId, t.activityId })
+        builder.HasIndex(t => new { userId = t.UserId, activityId = t.ActivityId })
             .IsUnique();
         
         // Define index on (user_id, task_urgency_id)
-        builder.HasIndex(t => new { t.userId, t.taskUrgencyId });
+        builder.HasIndex(t => new { userId = t.UserId, taskUrgencyId = t.TaskUrgencyId });
 
-        builder.HasOne(t => t.taskUrgency)
+        builder.HasOne(t => t.TaskUrgency)
             .WithMany()
-            .HasForeignKey(t => t.taskUrgencyId)
+            .HasForeignKey(t => t.TaskUrgencyId)
             .OnDelete(DeleteBehavior.Restrict); // Adjust cascade behavior as needed
     }
 }

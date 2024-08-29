@@ -4,8 +4,8 @@ namespace TimeOrganizer_net_core.model.DTO.response.user;
 
 public class UserResponse : IdResponse
 {
-    public string name { get; set; }
-    public string surname { get; set; }
-    public string email { get; set; }
-    public bool twoFactorEnabled { get; set; }
+    public string Name { get; set; }
+    public string Surname { get; set; }
+    public string Email { get; set; }
+    public bool TwoFactorEnabled { get; set; }
 }

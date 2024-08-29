@@ -10,14 +10,14 @@ namespace TimeOrganizer_net_core.repository.abs;
 public interface IRepository<T>
     where T : AbstractEntityWithUser
 {
-    IQueryable<T> getAsQueryable(long userId);
-    Task<T?> getByIdAsync(long id);
-    Task<List<T>> getAllAsync(long userId);
-    Task addAsync(T entity);
-    Task addRangeAsync(IEnumerable<T> entity);
-    Task updateAsync(T entity);
-    Task deleteAsync(long id);
-    Task batchDeleteAsync(Expression<Func<T, bool>> predicate);
+    IQueryable<T> GetAsQueryable(long userId);
+    Task<T?> GetByIdAsync(long id);
+    Task<List<T>> GetAllAsync(long userId);
+    Task AddAsync(T entity);
+    Task AddRangeAsync(IEnumerable<T> entity);
+    Task UpdateAsync(T entity);
+    Task DeleteAsync(long id);
+    Task BatchDeleteAsync(Expression<Func<T, bool>> predicate);
 }
 
 public class ParentRepository<T>(AppDbContext context) : IRepository<T>
@@ -26,37 +26,37 @@ public class ParentRepository<T>(AppDbContext context) : IRepository<T>
     protected readonly AppDbContext context = context;
     protected readonly DbSet<T> dbSet = context.Set<T>();
 
-    public IQueryable<T> getAsQueryable(long userId)
+    public IQueryable<T> GetAsQueryable(long userId)
     {
-        return dbSet.Where(e => e.userId == userId).AsQueryable();
+        return dbSet.Where(e => e.UserId == userId).AsQueryable();
     }
-    public async Task<T?> getByIdAsync(long id)
+    public async Task<T?> GetByIdAsync(long id)
     {
         return await dbSet.FindAsync(id);
     }
-    public async Task<List<T>> getAllAsync(long userId)
+    public async Task<List<T>> GetAllAsync(long userId)
     {
-        return await dbSet.Where(e => e.userId == userId).ToListAsync();
+        return await dbSet.Where(e => e.UserId == userId).ToListAsync();
     }
-    public async Task addAsync(T entity)
+    public async Task AddAsync(T entity)
     {
         await dbSet.AddAsync(entity);
         await context.SaveChangesAsync();
     }
 
-    public async Task addRangeAsync(IEnumerable<T> entity)
+    public async Task AddRangeAsync(IEnumerable<T> entity)
     {
         await dbSet.AddRangeAsync(entity);
         await context.SaveChangesAsync();
     }
 
-    public async Task updateAsync(T entity)
+    public async Task UpdateAsync(T entity)
     {
         dbSet.Update(entity);
         await context.SaveChangesAsync();
     }
 
-    public async Task deleteAsync(long id)
+    public async Task DeleteAsync(long id)
     {
         var entity = await dbSet.FindAsync(id);
         if (entity != null)
@@ -66,7 +66,7 @@ public class ParentRepository<T>(AppDbContext context) : IRepository<T>
         }
     }
 
-    public async Task batchDeleteAsync(Expression<Func<T, bool>> predicate)
+    public async Task BatchDeleteAsync(Expression<Func<T, bool>> predicate)
     {
         var entitiesToDelete = await dbSet.Where(predicate).ToListAsync();
 

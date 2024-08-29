@@ -12,7 +12,7 @@ namespace TimeOrganizer_net_core.service;
 
 public interface IRoutineToDoListService : IEntityWithIsDoneService<RoutineToDoList, RoutineToDoListRequest, RoutineToDoListResponse>
 {
-    Task<IEnumerable<RoutineToDoListGroupedResponse>> getAllGroupedByTimePeriod();
+    Task<IEnumerable<RoutineToDoListGroupedResponse>> GetAllGroupedByTimePeriod();
 }
 
 public class RoutineToDoListService(
@@ -24,11 +24,11 @@ public class RoutineToDoListService(
     : EntityWithIsDoneService<RoutineToDoList, RoutineToDoListRequest, RoutineToDoListResponse, IRoutineToDoListRepository>(repository,
         activityService, loggedUserService, mapper), IRoutineToDoListService
 {
-    public async Task<IEnumerable<RoutineToDoListGroupedResponse>> getAllGroupedByTimePeriod()
+    public async Task<IEnumerable<RoutineToDoListGroupedResponse>> GetAllGroupedByTimePeriod()
     {
-        var allTimePeriods = await timePeriodService.getAllAsync();
-        var allItems = await Repository.getAsQueryable(loggedUserService.GetLoggedUserId())
-            .ProjectTo<RoutineToDoListResponse>(Mapper.ConfigurationProvider)
+        var allTimePeriods = await timePeriodService.GetAllAsync();
+        var allItems = await repository.GetAsQueryable(loggedUserService.GetLoggedUserId())
+            .ProjectTo<RoutineToDoListResponse>(mapper.ConfigurationProvider)
             .ToListAsync();
         var groupedItems = allItems.GroupBy(item => item.timePeriod);
         var result = allTimePeriods.Select(tp => new RoutineToDoListGroupedResponse(

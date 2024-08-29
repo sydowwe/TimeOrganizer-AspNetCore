@@ -14,24 +14,24 @@ namespace TimeOrganizer_net_core.controller;
 public class RoleController(IRoleService service) : AbstractCrudController<Role,NameTextColorIconRequest,NameTextColorIconResponse,IRoleService>(service)
 {
     [HttpPost("create-defaults")]
-    public async Task<ActionResult<IEnumerable<NameTextColorIconResponse>>> createDefaults()
+    public async Task<ActionResult<IEnumerable<NameTextColorIconResponse>>> CreateDefaults()
     {
-        await service.createDefaultItems(0);
+        await service.CreateDefaultItems(0);
         return Ok("ok");
     }
    
     [NonAction]
-    public override Task<ActionResult<NameTextColorIconResponse>> update(long id, NameTextColorIconRequest request)
+    public override Task<ActionResult<NameTextColorIconResponse>> Update(long id, NameTextColorIconRequest request)
     {
         return null;
     }
     [NonAction]
-    public override  Task<ActionResult<IdResponse>> delete(long id)
+    public override  Task<ActionResult<IdResponse>> Delete(long id)
     {
         return null;
     }
     [NonAction]
-    public override Task<ActionResult<SuccessResponse>> batchDelete(List<IdRequest> request)
+    public override Task<ActionResult<SuccessResponse>> BatchDelete(List<IdRequest> request)
     {
         return null;
     }

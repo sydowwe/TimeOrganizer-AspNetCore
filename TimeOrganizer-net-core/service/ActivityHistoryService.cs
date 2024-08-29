@@ -12,23 +12,23 @@ namespace TimeOrganizer_net_core.service;
 
 public interface IActivityHistoryService : IEntityWithActivityService<ActivityHistory, ActivityHistoryRequest, ActivityHistoryResponse>
 {
-    Task<List<ActivityHistoryListGroupedByDateResponse>> filterAsync(ActivityHistoryFilterRequest filterRequest);
+    Task<List<ActivityHistoryListGroupedByDateResponse>> FilterAsync(ActivityHistoryFilterRequest filterRequest);
 }
 
 public class ActivityHistoryService(IActivityHistoryRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
     : MyService<ActivityHistory, ActivityHistoryRequest, ActivityHistoryResponse, IActivityHistoryRepository>(repository, loggedUserService, mapper), IActivityHistoryService
 {
-       public async Task<List<ActivityHistoryListGroupedByDateResponse>> filterAsync(ActivityHistoryFilterRequest filterRequest)
+       public async Task<List<ActivityHistoryListGroupedByDateResponse>> FilterAsync(ActivityHistoryFilterRequest filterRequest)
     {
-        var query = Repository.applyFilters(loggedUserService.GetLoggedUserId(), filterRequest);
+        var query = repository.ApplyFilters(loggedUserService.GetLoggedUserId(), filterRequest);
 
-        var historyResponses = await query.OrderBy(h=>h.startTimestamp)
-            .ProjectTo<ActivityHistoryResponse>(Mapper.ConfigurationProvider).ToListAsync();
+        var historyResponses = await query.OrderBy(h=>h.StartTimestamp)
+            .ProjectTo<ActivityHistoryResponse>(mapper.ConfigurationProvider).ToListAsync();
 
         return historyResponses
-            .GroupBy(hr => hr.startTimestamp.ToUniversalTime().Date)
-            .Select(group => new ActivityHistoryListGroupedByDateResponse(group.Key, group.OrderBy(h=>h.startTimestamp).ToList()))
-            .OrderBy(response => response.date)
+            .GroupBy(hr => hr.StartTimestamp.ToUniversalTime().Date)
+            .Select(group => new ActivityHistoryListGroupedByDateResponse(group.Key, group.OrderBy(h=>h.StartTimestamp).ToList()))
+            .OrderBy(response => response.Date)
             .ToList();
     }
 

@@ -47,7 +47,7 @@ public class UserService(
 {
     public async Task<ServiceResult<RegistrationResponse>> RegisterUserAsync(RegistrationRequest registration)
     {
-        if (!await googleRecaptchaService.verifyRecaptchaAsync(registration.recaptchaToken, "register"))
+        if (!await googleRecaptchaService.VerifyRecaptchaAsync(registration.RecaptchaToken, "register"))
         {
             return ServiceResult<RegistrationResponse>.Error(
                 ServiceResultErrorType.BadRequest,
@@ -56,16 +56,16 @@ public class UserService(
         }
         var newUser = new User
         {
-            name = registration.name,
-            surname = registration.surname,
+            Name = registration.name,
+            Surname = registration.surname,
             Email = registration.Email,
             UserName = registration.Email,
             TwoFactorEnabled = registration.TwoFactorEnabled,
-            currentLocale = registration.currentLocale,
-            timezone = TimeZoneInfo.FindSystemTimeZoneById(registration.Timezone),
-            isStayLoggedIn = false
+            CurrentLocale = registration.CurrentLocale,
+            Timezone = TimeZoneInfo.FindSystemTimeZoneById(registration.Timezone),
+            IsStayLoggedIn = false
         };
-        var result = await userManager.CreateAsync(newUser, registration.password);
+        var result = await userManager.CreateAsync(newUser, registration.Password);
         if (!result.Succeeded)
         {
             if (result.Errors.Any(e => e.Code is "DuplicateUserName" or "DuplicateEmail"))
@@ -101,8 +101,8 @@ public class UserService(
             return ServiceResult<LoginResponse>.Error(userResult.ErrorType, userResult.ErrorMessage);
         }
         var user = userResult.Data;
-        var result = await signInManager.PasswordSignInAsync(user, loginRequest.password,
-            loginRequest.stayLoggedIn, true);
+        var result = await signInManager.PasswordSignInAsync(user, loginRequest.Password,
+            loginRequest.StayLoggedIn, true);
         if (result.IsNotAllowed)
         {
             await userManager.AccessFailedAsync(user);
@@ -121,16 +121,16 @@ public class UserService(
         {
             ServiceResult<LoginResponse>.Error(ServiceResultErrorType.InternalServerError, result.ToString());
         }
-        user.isStayLoggedIn = loginRequest.stayLoggedIn;
-        user.currentLocale = loginRequest.currentLocale;
-        user.timezone = TimeZoneInfo.FindSystemTimeZoneById(loginRequest.Timezone);
+        user.IsStayLoggedIn = loginRequest.StayLoggedIn;
+        user.CurrentLocale = loginRequest.CurrentLocale;
+        user.Timezone = TimeZoneInfo.FindSystemTimeZoneById(loginRequest.Timezone);
         //TODO robi zbytocne query na username treba odstranit
         await userManager.UpdateAsync(user);
         return ServiceResult<LoginResponse>.Successful(
             new LoginResponse
             {
                 RequiresTwoFactor = result.RequiresTwoFactor,
-                CurrentLocale = user.currentLocale
+                CurrentLocale = user.CurrentLocale
             });
     }
 
@@ -212,7 +212,7 @@ public class UserService(
     public async Task<ServiceResult> ChangeCurrentLocaleAsync(AvailableLocales locale)
     {
         var user = await GetLoggedUserAsync();
-        user.currentLocale = locale;
+        user.CurrentLocale = locale;
         var result = await userManager.UpdateAsync(user);
         return result.Succeeded
             ? ServiceResult.Successful()
@@ -266,8 +266,8 @@ public class UserService(
         await userManager.UpdateAsync(loggedUser);
         return new EditedUserResponse(mapper.Map<UserResponse>(loggedUser))
         {
-            qrCode = qrCode,
-            scratchCodes = scratchCodes
+            QrCode = qrCode,
+            ScratchCodes = scratchCodes
         };
     }
 
@@ -310,9 +310,9 @@ public class UserService(
 
     private async Task SetDefaultSettingsAsync(long userId)
     {
-        await taskUrgencyService.createDefaultItems(userId);
-        await routineTimePeriodService.createDefaultItems(userId);
-        await roleService.createDefaultItems(userId);
+        await taskUrgencyService.CreateDefaultItems(userId);
+        await routineTimePeriodService.CreateDefaultItems(userId);
+        await roleService.CreateDefaultItems(userId);
     }
 
     private async Task SendConfirmationEmail(User user)

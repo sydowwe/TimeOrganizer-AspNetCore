@@ -6,16 +6,16 @@ public abstract class AbstractNameTextEntity : AbstractEntityWithUser
 {
     [Required]
     //Unique
-    public string name { get; set; }
+    public string Name { get; set; }
 
-    public string text { get; set; }
+    public string Text { get; set; }
 
     protected AbstractNameTextEntity()
     {}
 
     protected AbstractNameTextEntity(string name, string text, long userId) : base(userId)
     {
-        this.name = name;
-        this.text = text;
+        this.Name = name;
+        this.Text = text;
     }
 }

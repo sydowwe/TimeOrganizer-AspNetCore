@@ -15,19 +15,19 @@ public class RoutineToDoListController(IRoutineToDoListService service)
     : AbstractWithActivityController<RoutineToDoList, RoutineToDoListRequest, RoutineToDoListResponse, IRoutineToDoListService>(service)
 {
     [HttpPatch("change-done")]
-    public async Task<ActionResult<SuccessResponse>> changeDone(List<IdRequest> requestList)
+    public async Task<ActionResult<SuccessResponse>> ChangeDone(List<IdRequest> requestList)
     {
-        await service.setIsDoneAsync(requestList);
+        await service.SetIsDoneAsync(requestList);
         return Ok(new SuccessResponse("changed"));
     }
     [NonAction]
-    public override Task<ActionResult<IEnumerable<RoutineToDoListResponse>>> getAll()
+    public override Task<ActionResult<IEnumerable<RoutineToDoListResponse>>> GetAll()
     {
         return null;
     }
     [HttpPost("get-all")]
-    public async Task<ActionResult<IEnumerable<RoutineToDoListGroupedResponse>>> getAllGrouped()
+    public async Task<ActionResult<IEnumerable<RoutineToDoListGroupedResponse>>> GetAllGrouped()
     {
-        return Ok(await service.getAllGroupedByTimePeriod());
+        return Ok(await service.GetAllGroupedByTimePeriod());
     }
 }

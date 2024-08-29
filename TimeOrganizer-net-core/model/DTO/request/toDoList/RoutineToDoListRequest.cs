@@ -4,5 +4,5 @@ namespace TimeOrganizer_net_core.model.DTO.request.ToDoList;
 
 public class RoutineToDoListRequest : WithIsDoneRequest
 {
-    public long timePeriodId { get; set; }
+    public long TimePeriodId { get; set; }
 }

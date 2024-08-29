@@ -4,5 +4,5 @@ namespace TimeOrganizer_net_core.model.DTO.request.ToDoList;
 
 public class TaskUrgencyRequest : TextColorRequest
 {
-    public int priority { get; set; }
+    public int Priority { get; set; }
 }

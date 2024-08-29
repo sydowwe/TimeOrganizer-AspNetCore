@@ -6,41 +6,41 @@ namespace TimeOrganizer_net_core.repository;
 
 public interface IActivityHistoryRepository : IEntityWithActivityRepository<ActivityHistory>
 {
-    IQueryable<ActivityHistory> applyFilters(long userId, ActivityHistoryFilterRequest filter);
+    IQueryable<ActivityHistory> ApplyFilters(long userId, ActivityHistoryFilterRequest filter);
 }
 
 public class ActivityHistoryRepository(AppDbContext context) : EntityWithActivityRepository<ActivityHistory>(context), IActivityHistoryRepository
 {
-    public IQueryable<ActivityHistory> applyFilters(long userId, ActivityHistoryFilterRequest filter)
+    public IQueryable<ActivityHistory> ApplyFilters(long userId, ActivityHistoryFilterRequest filter)
     {
-        var query = context.activityHistories.AsQueryable();
-        query = query.Where(h => h.userId == userId);
+        var query = context.ActivityHistories.AsQueryable();
+        query = query.Where(h => h.UserId == userId);
 
-        if (filter.activityId.HasValue)
-            query = query.Where(h => h.activityId == filter.activityId);
+        if (filter.ActivityId.HasValue)
+            query = query.Where(h => h.ActivityId == filter.ActivityId);
 
-        if (filter.roleId.HasValue)
-            query = query.Where(h => h.activity.categoryId == filter.roleId);
+        if (filter.RoleId.HasValue)
+            query = query.Where(h => h.Activity.CategoryId == filter.RoleId);
 
-        if (filter.categoryId.HasValue)
-            query = query.Where(h => h.activity.roleId == filter.categoryId);
+        if (filter.CategoryId.HasValue)
+            query = query.Where(h => h.Activity.RoleId == filter.CategoryId);
 
-        if (filter.isFromToDoList.HasValue)
-            query = query.Where(h => h.activity.isOnToDoList == filter.isFromToDoList);
+        if (filter.IsFromToDoList.HasValue)
+            query = query.Where(h => h.Activity.IsOnToDoList == filter.IsFromToDoList);
 
-        if (filter.isUnavoidable.HasValue)
-            query = query.Where(h => h.activity.isUnavoidable == filter.isUnavoidable);
+        if (filter.IsUnavoidable.HasValue)
+            query = query.Where(h => h.Activity.IsUnavoidable == filter.IsUnavoidable);
 
-        if (filter.dateFrom.HasValue)
-            query = query.Where(h => h.startTimestamp >= filter.dateFrom);
+        if (filter.DateFrom.HasValue)
+            query = query.Where(h => h.StartTimestamp >= filter.DateFrom);
 
-        if (filter.dateTo.HasValue)
-            query = query.Where(h => h.startTimestamp <= filter.dateTo);
+        if (filter.DateTo.HasValue)
+            query = query.Where(h => h.StartTimestamp <= filter.DateTo);
 
-        if (filter.hoursBack.HasValue)
+        if (filter.HoursBack.HasValue)
         {
-            var cutoffTime = DateTime.UtcNow.AddHours(-filter.hoursBack.Value);
-            query = query.Where(h => h.startTimestamp >= cutoffTime);
+            var cutoffTime = DateTime.UtcNow.AddHours(-filter.HoursBack.Value);
+            query = query.Where(h => h.StartTimestamp >= cutoffTime);
         }
 
         return query;
