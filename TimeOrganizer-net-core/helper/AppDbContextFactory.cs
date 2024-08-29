@@ -1,3 +1,5 @@
+using TimeOrganizer_net_core.security;
+
 namespace TimeOrganizer_net_core.helper;
 
 using Microsoft.EntityFrameworkCore;
@@ -5,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 
-public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+public class AppDbContextFactory(ILoggedUserService loggedUserService) : IDesignTimeDbContextFactory<AppDbContext>
 {
     public AppDbContext CreateDbContext(string[] args)
     {
@@ -17,6 +19,6 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         optionsBuilder.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
 
-        return new AppDbContext(optionsBuilder.Options);
+        return new AppDbContext(optionsBuilder.Options,loggedUserService);
     }
 }

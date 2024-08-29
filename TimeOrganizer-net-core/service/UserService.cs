@@ -61,7 +61,8 @@ public class UserService(
             Email = registration.Email,
             UserName = registration.Email,
             TwoFactorEnabled = registration.TwoFactorEnabled,
-            // currentLocale = registration.currentLocale,
+            currentLocale = registration.currentLocale,
+            timezone = TimeZoneInfo.FindSystemTimeZoneById(registration.Timezone),
             isStayLoggedIn = false
         };
         var result = await userManager.CreateAsync(newUser, registration.password);
@@ -69,21 +70,20 @@ public class UserService(
         {
             if (result.Errors.Any(e => e.Code is "DuplicateUserName" or "DuplicateEmail"))
             {
-                return ServiceResult<RegistrationResponse>.Error(ServiceResultErrorType.Conflict, "Failed to register user with EMAIL: " + newUser.Email);
+                return ServiceResult<RegistrationResponse>.Error(ServiceResultErrorType.Conflict, "User already exists with EMAIL: " + newUser.Email);
             }
-            return ServiceResult<RegistrationResponse>.Error(ServiceResultErrorType.BadRequest, "Failed to register user " + string.Join(", ", result.Errors.Select(e => e.Description)));
+            return ServiceResult<RegistrationResponse>.Error(ServiceResultErrorType.BadRequest, "Failed to register user because: " + string.Join(", ", result.Errors.Select(e => e.Description)));
 
         }
-        var scratchCodes = await GenerateTwoFactorAuthScratchCodesAsync(newUser);
+        var recoveryCodes = await GenerateTwoFactorAuthScratchCodesAsync(newUser);
         var qrCode = await GetTwoFactorAuthQrCodeAsync(newUser);
         await SetDefaultSettingsAsync(newUser.Id);
         return ServiceResult<RegistrationResponse>.Successful(
             new RegistrationResponse
             {
-                Email = newUser.Email,
-                RequiresTwoFactor = newUser.TwoFactorEnabled,
+                TwoFactorEnabled = newUser.TwoFactorEnabled,
                 QrCode = qrCode,
-                ScratchCodes = scratchCodes
+                RecoveryCodes = recoveryCodes
             });
     }
     public async Task<ServiceResult<LoginResponse>> LoginUserAsync(LoginRequest loginRequest)
@@ -111,20 +111,23 @@ public class UserService(
         }
         if (result.IsLockedOut)
         {
+            var lockoutDuration = user.LockoutEnd!.Value - DateTimeOffset.Now;
+            var minutes = (int)lockoutDuration.TotalMinutes;
+            var seconds = lockoutDuration.Seconds;
             return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.UserLockedOut,
-                "User locked out for  minutes");
+                $"User locked out for {minutes}m {seconds}s");
         }
         if (!result.Succeeded)
         {
             ServiceResult<LoginResponse>.Error(ServiceResultErrorType.InternalServerError, result.ToString());
         }
         user.isStayLoggedIn = loginRequest.stayLoggedIn;
-        user.timezone = loginRequest.timezone;
+        user.currentLocale = loginRequest.currentLocale;
+        user.timezone = TimeZoneInfo.FindSystemTimeZoneById(loginRequest.Timezone);
         await userManager.UpdateAsync(user);
         return ServiceResult<LoginResponse>.Successful(
             new LoginResponse
             {
-                Email = loginRequest.Email,
                 RequiresTwoFactor = result.RequiresTwoFactor,
                 CurrentLocale = user.currentLocale
             });

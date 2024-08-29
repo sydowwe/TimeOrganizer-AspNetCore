@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TimeOrganizer_net_core.helper;
 using TimeOrganizer_net_core.model.DTO.request.user;
@@ -10,6 +11,7 @@ namespace TimeOrganizer_net_core.controller;
 [Route("[controller]")]
 public class UserController(IUserService userService) : ControllerBase
 {
+    [AllowAnonymous]
     [HttpPost("auth/register")]
     public async Task<IActionResult> RegisterUserAsync([FromBody] RegistrationRequest registrationRequest)
     {
@@ -25,7 +27,7 @@ public class UserController(IUserService userService) : ControllerBase
         }
         return Ok(result.Data);
     }
-
+    [AllowAnonymous]
     [HttpPost("auth/login")]
     public async Task<IActionResult> LoginUserAsync([FromBody] LoginRequest loginRequest)
     {
@@ -43,7 +45,7 @@ public class UserController(IUserService userService) : ControllerBase
         }
         return Ok(result.Data);
     }
-
+    
     [HttpPost("auth/login-2fa")]
     public async Task<IActionResult> ValidateTwoFactorAuthLoginAsync([FromBody] GoogleAuthLoginRequest googleAuthLoginRequest)
     {
@@ -54,14 +56,8 @@ public class UserController(IUserService userService) : ControllerBase
         }
         return Ok();
     }
-
-    [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
-    {
-        await userService.Logout(HttpContext);
-        return Ok();
-    }
-
+  
+    [AllowAnonymous]
     [HttpPost("confirm-email")]
     public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string code)
     {
@@ -77,7 +73,7 @@ public class UserController(IUserService userService) : ControllerBase
         }
         return Ok();
     }
-
+    [AllowAnonymous]
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromQuery] string email)
     {
@@ -93,7 +89,7 @@ public class UserController(IUserService userService) : ControllerBase
         }
         return Ok();
     }
-
+    [AllowAnonymous]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest resetPasswordRequest)
     {
@@ -109,7 +105,12 @@ public class UserController(IUserService userService) : ControllerBase
         }
         return Ok();
     }
-
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await userService.Logout(HttpContext);
+        return Ok();
+    }
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePasswordAsync([FromQuery] string currentPassword, [FromQuery] string newPassword)
     {
@@ -126,7 +127,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpPost("change-locale")]
-    public async Task<IActionResult> ChangeCurrentLocaleAsync([FromQuery] AvailableLocales locale)
+    public async Task<IActionResult> ChangeCurrentLocaleAsync([FromBody] AvailableLocales locale)
     {
         var result = await userService.ChangeCurrentLocaleAsync(locale);
         if (!result.Success)
@@ -161,7 +162,7 @@ public class UserController(IUserService userService) : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("info")]
+    [HttpPost("data")]
     public async Task<IActionResult> GetLoggedUserDataAsync()
     {
         var userResponse = await userService.GetLoggedUserDataAsync();

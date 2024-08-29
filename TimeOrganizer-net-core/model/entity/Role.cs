@@ -8,14 +8,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public class Role : AbstractAbstractNameTextColorEntity
 {
-    public string icon { get; set; }
+    // public string icon { get; set; }
     public virtual ICollection<Activity> activities { get; set; } = new List<Activity>();
 
     public Role() : base() {}
 
     public Role(long userId, string name, string text, string color, string icon) : base(name, text, color, userId)
     {
-        this.icon = icon;
+        // this.icon = icon;
     }
 }
 public class RoleConfiguration : IEntityTypeConfiguration<Role>

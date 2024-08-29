@@ -21,10 +21,10 @@ public class RoutineTimePeriodService(IRoutineTimePeriodRepository repository, I
     {
         await this.Repository.addRangeAsync(
             [
-                new RoutineTimePeriod(loggedUserService.GetLoggedUserId(), "Daily", "#92F58C", 1, false),         // Green
-                new RoutineTimePeriod(loggedUserService.GetLoggedUserId(), "Weekly", "#936AF1", 7, false),      // purple
-                new RoutineTimePeriod(loggedUserService.GetLoggedUserId(), "Monthly", "#2C7EF4", 30, false),     // blue
-                new RoutineTimePeriod(loggedUserService.GetLoggedUserId(), "Yearly", "#A5CCF3", 365, false) 
+                new RoutineTimePeriod(newUserId, "Daily", "#92F58C", 1, false),         // Green
+                new RoutineTimePeriod(newUserId, "Weekly", "#936AF1", 7, false),      // purple
+                new RoutineTimePeriod(newUserId, "Monthly", "#2C7EF4", 30, false),     // blue
+                new RoutineTimePeriod(newUserId, "Yearly", "#A5CCF3", 365, false) 
             ]
         );
     }

@@ -10,6 +10,6 @@ public class EditedUserResponse : UserResponse
         name = userResponse.name;
         surname = userResponse.surname;
         email = userResponse.email;
-        has2FA = userResponse.has2FA;
+        twoFactorEnabled = userResponse.twoFactorEnabled;
     }
 }

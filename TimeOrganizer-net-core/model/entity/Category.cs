@@ -10,15 +10,7 @@ public class Category : AbstractAbstractNameTextColorEntity
 {
     public virtual ICollection<Activity> activities { get; set; } = new List<Activity>();
 
-    public string icon { get; set; }
-
-    public Category() : base() {}
-
-    public Category(string name, string text, string color, string icon, long userId)
-        : base(name, text, color, userId)
-    {
-        this.icon = icon;
-    }
+    // public string icon { get; set; }
 }
 public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 {

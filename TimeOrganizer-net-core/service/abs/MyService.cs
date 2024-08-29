@@ -17,6 +17,7 @@ public interface IMyService<TEntity, in TRequest, TResponse>
 {
     Task<TResponse> getByIdAsync(long id);
     Task<IEnumerable<TResponse>> getAllAsync();
+    Task<IEnumerable<SelectOptionResponse>> getAllAsOptionsAsync();
     Task<TResponse> insertAsync(TRequest request);
     Task<TResponse> updateAsync(long id, TRequest request);
     Task deleteAsync(long id);
@@ -50,7 +51,10 @@ public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
     {
         return await Repository.getAsQueryable(loggedUserService.GetLoggedUserId()).ProjectTo<TResponse>(Mapper.ConfigurationProvider).ToListAsync();
     }
-
+    public async Task<IEnumerable<SelectOptionResponse>> getAllAsOptionsAsync()
+    {
+        return await Repository.getAsQueryable(loggedUserService.GetLoggedUserId()).ProjectTo<SelectOptionResponse>(Mapper.ConfigurationProvider).ToListAsync();
+    }
     public async Task<TResponse> insertAsync(TRequest request)
     {
         var entity = Mapper.Map<TEntity>(request);
@@ -60,7 +64,7 @@ public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
 
     public async Task<IEnumerable<TResponse>> insertRangeAsync(IEnumerable<TRequest> request)
     {
-        var entities = Mapper.Map<IEnumerable<TEntity>>(request);
+        var entities = Mapper.Map<List<TEntity>>(request);
         await Repository.addRangeAsync(entities);
         return Mapper.Map<IEnumerable<TResponse>>(entities);
     }

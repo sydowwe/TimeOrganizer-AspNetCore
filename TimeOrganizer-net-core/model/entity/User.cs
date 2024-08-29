@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TimeOrganizer_net_core.model.entity.abs;
 
 namespace TimeOrganizer_net_core.model.entity;
 
@@ -11,9 +9,9 @@ using System.ComponentModel.DataAnnotations;
 
 public enum AvailableLocales
 {
-    En,
-    Sk,
-    // add more locales as needed
+    EN,
+    SK,
+    CZ
 }
 
 public class User : IdentityUser<long>
@@ -28,7 +26,7 @@ public class User : IdentityUser<long>
     [Required] public bool isStayLoggedIn { get; set; }
 
     // Current Locale
-    [Required] public AvailableLocales currentLocale { get; set; } = AvailableLocales.Sk;
+    [Required] public AvailableLocales currentLocale { get; set; } = AvailableLocales.SK;
 
     // Timezone
     [Required] public TimeZoneInfo timezone { get; set; } // Assuming ZoneIdDBConverter is for ZoneId, store as string

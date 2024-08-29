@@ -10,7 +10,7 @@ using TimeOrganizer_net_core.service;
 namespace TimeOrganizer_net_core.controller;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class RoleController(IRoleService service) : AbstractCrudController<Role,NameTextColorIconRequest,NameTextColorIconResponse,IRoleService>(service)
 {
     [HttpPost("create-defaults")]

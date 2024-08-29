@@ -8,5 +8,5 @@ public class LoginRequest : EmailRequest
     public bool stayLoggedIn { get; set; }
     public string recaptchaToken { get; set; }
     public AvailableLocales currentLocale { get; set; }
-    public TimeZoneInfo timezone { get; set; } 
+    public string Timezone { get; set; } 
 }

@@ -2,9 +2,9 @@ using TimeOrganizer_net_core.model.DTO.response.generic;
 
 namespace TimeOrganizer_net_core.model.DTO.response.user;
 
-public class RegistrationResponse : EmailResponse
+public class RegistrationResponse : IResponse
 {
-    public bool RequiresTwoFactor { get; set; }
+    public bool TwoFactorEnabled { get; set; }
     public byte[]? QrCode { get; set; }
-    public IEnumerable<string>? ScratchCodes { get; set; }
+    public IEnumerable<string>? RecoveryCodes { get; set; }
 }

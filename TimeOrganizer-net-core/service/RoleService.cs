@@ -21,9 +21,9 @@ public class RoleService(IRoleRepository repository, ILoggedUserService loggedUs
     {
         await this.Repository.addRangeAsync(
             [
-                new Role(loggedUserService.GetLoggedUserId(), "Planner task", "Quickly created activities in task planner", "", "calendar-days"),
-                new Role(loggedUserService.GetLoggedUserId(), "To-do list task", "Quickly created activities in to-do list", "", "list-check"),
-                new Role(loggedUserService.GetLoggedUserId(), "Routine task", "Quickly created activities in routine to-do list", "", "recycle")
+                new Role(newUserId, "Planner task", "Quickly created activities in task planner", "", "calendar-days"),
+                new Role(newUserId, "To-do list task", "Quickly created activities in to-do list", "", "list-check"),
+                new Role(newUserId, "Routine task", "Quickly created activities in routine to-do list", "", "recycle")
             ]
         );
     }

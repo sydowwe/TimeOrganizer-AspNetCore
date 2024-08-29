@@ -8,11 +8,8 @@ namespace TimeOrganizer_net_core;
 
 using Microsoft.EntityFrameworkCore;
 
-public class AppDbContext : IdentityDbContext<User, UserRole, long>
+public class AppDbContext(DbContextOptions<AppDbContext> options, ILoggedUserService loggedUserService) : IdentityDbContext<User, UserRole, long>(options)
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
-    }
     public DbSet<Activity> activities { get; set; }
     public DbSet<Alarm> alarms { get; set; }
     public DbSet<Category> categories { get; set; }
@@ -44,22 +41,23 @@ public class AppDbContext : IdentityDbContext<User, UserRole, long>
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         base.OnModelCreating(modelBuilder);
     }
-    public override int SaveChanges()
-    {
-        foreach (var entry in ChangeTracker.Entries<AbstractEntity>())
-        {
-            if (entry.State == EntityState.Added)
-            {
-                entry.Entity.createdTimestamp = DateTime.UtcNow;
-            }
-
-            if (entry.State == EntityState.Modified)
-            {
-                entry.Entity.modifiedTimestamp = DateTime.UtcNow;
-            }
-        }
-        return base.SaveChanges();
-    }
+    // public override int SaveChanges()
+    // {
+    //     foreach (var entry in ChangeTracker.Entries<AbstractEntity>())
+    //     {
+    //         if (entry.State == EntityState.Added)
+    //         {
+    //             entry.Entity.createdTimestamp = DateTime.UtcNow;
+    //         }
+    //
+    //         if (entry.State == EntityState.Modified)
+    //         {
+    //             entry.Entity.modifiedTimestamp = DateTime.UtcNow;
+    //         }
+    //     }
+    //     
+    //     return base.SaveChanges();
+    // }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -75,7 +73,14 @@ public class AppDbContext : IdentityDbContext<User, UserRole, long>
                 entry.Entity.modifiedTimestamp = DateTime.UtcNow;
             }
         }
-
+        var userId = loggedUserService.GetLoggedUserId();
+        foreach (var entry in ChangeTracker.Entries<AbstractEntityWithUser>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.userId = userId;
+            }
+        }
         return await base.SaveChangesAsync(cancellationToken);
     }
     private void ConfigureNameTextEntity<TEntity>(EntityTypeBuilder<TEntity> builder) 

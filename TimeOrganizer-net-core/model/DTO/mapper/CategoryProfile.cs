@@ -12,5 +12,6 @@ public class CategoryProfile : Profile
     {
         CreateMap<NameTextColorIconRequest, Category>();
         CreateMap<Category, NameTextColorIconResponse>();
+        CreateMap<Category, SelectOptionResponse>().ForMember(dest => dest.label, opt => opt.MapFrom(src => src.name));
     }
 }

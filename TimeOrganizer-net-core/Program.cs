@@ -1,5 +1,8 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using TimeOrganizer_net_core;
 using TimeOrganizer_net_core.exception;
 using TimeOrganizer_net_core.helper;
@@ -61,14 +64,20 @@ builder.Services.AddAutoMapper(typeof(ActivityProfile).Assembly);
 builder.Services.AddIdentityServices();
 builder.Services.AddDistributedMemoryCache(); // You can replace this with Redis for distributed caching
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
+}).AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
         builder =>
         {
-            builder.WithOrigins("http://localhost:3000", Environment.GetEnvironmentVariable("CORS_ENABLED_URL") ?? throw new EnvironmentVariableMissingException("CORS_ENABLED_URL"))
+            builder.WithOrigins("http://localhost:3000","http://localhost:5104", Environment.GetEnvironmentVariable("CORS_ENABLED_URL") ?? throw new EnvironmentVariableMissingException("CORS_ENABLED_URL"))
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -84,6 +93,8 @@ builder.Services.AddSession(options =>
     options.Cookie.MaxAge = TimeSpan.FromHours(3);
 });
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 var app = builder.Build();
 
 
@@ -101,13 +112,16 @@ else
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+// app.UseHttpsRedirection();
 app.UsePathBase(new PathString("/api"));
 app.UseRouting();
+
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCors("AllowFrontend");
-app.UseHttpsRedirection();
+app.UseSession(); 
 
 app.MapControllers();
 

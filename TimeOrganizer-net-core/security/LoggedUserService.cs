@@ -19,7 +19,7 @@ public class LoggedUserService(IHttpContextAccessor httpContextAccessor) : ILogg
         {
             throw new Exception("user not in context");
         }
-        if (user.Identity == null || user.Identity.IsAuthenticated)
+        if (user.Identity is not { IsAuthenticated: true })
         {
             throw new Exception("user not authenticated");
         }

@@ -20,6 +20,11 @@ public abstract class AbstractCrudController<TEntity, TRequest, TResponse, TServ
     {
         return Ok(await service.getAllAsync());
     }
+    [HttpPost("get-all-options")]
+    public virtual async Task<ActionResult<IEnumerable<TResponse>>> getAllOptions()
+    {
+        return Ok(await service.getAllAsOptionsAsync());
+    }
 
     [HttpGet("{id:long}")]
     public virtual async Task<ActionResult<TResponse>> get(long id)

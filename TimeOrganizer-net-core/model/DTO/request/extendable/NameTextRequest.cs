@@ -8,7 +8,6 @@ public class NameTextRequest : IRequest
     [StringLength(50)] // Adjust length as needed
     public string name { get; set; }
 
-    [Required]
     [StringLength(200)] // Adjust length as needed
     public string text { get; set; }
 }

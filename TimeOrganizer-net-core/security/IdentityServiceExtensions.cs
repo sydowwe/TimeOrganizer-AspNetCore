@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using TimeOrganizer_net_core.helper;
 using TimeOrganizer_net_core.model.entity;
@@ -9,24 +11,10 @@ public static class IdentityServiceExtensions
 {
     public static IServiceCollection AddIdentityServices(this IServiceCollection services)
     {
-        // services.ConfigureApplicationCookie(options =>
-        // {
-        //     // Cookie settings
-        //     options.Cookie.HttpOnly = true; // Prevents client-side scripts from accessing the cookie
-        //     options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Cookie expiration time
-        //
-        //     options.LoginPath = "/Account/Login"; // Redirect to login page
-        //     options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect to access denied page
-        //     options.SlidingExpiration = true; // Resets the expiration time if the user is active
-        // });
-        
         services.AddIdentity<User, UserRole>(options =>
             {
-                // Password settings.
                 options.Password.RequiredLength = 8;
                 options.Password.RequiredUniqueChars = 4;
-                // Lockout settings.
-
                 options.User.RequireUniqueEmail = true;
                 // options.Stores.ProtectPersonalData = true;
                 options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Email;
@@ -52,8 +40,32 @@ public static class IdentityServiceExtensions
             //         opt.Cookie.MaxAge = TimeSpan.FromHours(3);
             //     });
             // });
-        services.AddAuthorization();
-
+            
+            
+            services.AddAuthorizationBuilder().SetFallbackPolicy(
+                new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .RequireClaim(ClaimTypes.NameIdentifier)
+                    .Build()
+                );
+            services.ConfigureApplicationCookie(options =>
+            {
+                // options.Cookie.SameSite = SameSiteMode.None;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Cookie expiration time
+                options.Cookie.Path = "/";
+                options.Cookie.SameSite= SameSiteMode.None;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return Task.CompletedTask;
+                };
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    return Task.CompletedTask;
+                };
+            });
         return services;
     }
 }

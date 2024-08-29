@@ -20,10 +20,10 @@ public class TaskUrgencyService(ITaskUrgencyRepository repository, ILoggedUserSe
     {
         await this.Repository.addRangeAsync(
             [
-                new TaskUrgency(loggedUserService.GetLoggedUserId(), "Today", "#FF5252", 1),         // Red
-                new TaskUrgency(loggedUserService.GetLoggedUserId(), "This week", "#FFA726", 2),      // Orange
-                new TaskUrgency(loggedUserService.GetLoggedUserId(), "This month", "#FFD600", 3),     // Yellow
-                new TaskUrgency(loggedUserService.GetLoggedUserId(), "This year", "#4CAF50", 4)    
+                new TaskUrgency(newUserId, "Today", "#FF5252", 1),         // Red
+                new TaskUrgency(newUserId, "This week", "#FFA726", 2),      // Orange
+                new TaskUrgency(newUserId, "This month", "#FFD600", 3),     // Yellow
+                new TaskUrgency(newUserId, "This year", "#4CAF50", 4)    
             ]
         );
     }
