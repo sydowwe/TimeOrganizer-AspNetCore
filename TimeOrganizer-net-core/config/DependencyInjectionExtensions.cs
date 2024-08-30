@@ -28,7 +28,6 @@ public static class DependencyInjectionExtensions
         services.AddScoped<ILoggedUserService, LoggedUserService>();
         services.AddScoped<IUserService, UserService>();
         services.AddHttpClient<IGoogleRecaptchaService, GoogleRecaptchaService>();
-        services.AddSingleton<IGoogleRecaptchaService, GoogleRecaptchaService>();
         // Configure mail settings
         // services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
         services.AddTransient<IEmailService, EmailService>();

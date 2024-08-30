@@ -21,7 +21,7 @@ public abstract class AbstractCrudController<TEntity, TRequest, TResponse, TServ
         return Ok(await service.GetAllAsync());
     }
     [HttpPost("get-all-options")]
-    public virtual async Task<ActionResult<IEnumerable<TResponse>>> GetAllOptions()
+    public virtual async Task<ActionResult<IEnumerable<SelectOptionResponse>>> GetAllOptions()
     {
         return Ok(await service.GetAllAsOptionsAsync());
     }

@@ -7,4 +7,5 @@ public class LoginResponse : IResponse
 {
     public bool RequiresTwoFactor { get; set; }
     public AvailableLocales CurrentLocale { get; set; }
+    
 }

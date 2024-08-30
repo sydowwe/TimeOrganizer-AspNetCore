@@ -51,7 +51,7 @@ public class UserService(
         {
             return ServiceResult<RegistrationResponse>.Error(
                 ServiceResultErrorType.BadRequest,
-                "Wrong captcha token or action"
+                "Wrong captcha token  or action"
             );
         }
         var newUser = new User

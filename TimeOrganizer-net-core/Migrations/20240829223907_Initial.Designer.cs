@@ -12,7 +12,7 @@ using TimeOrganizer_net_core;
 namespace TimeOrganizer_net_core.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240829202848_Initial")]
+    [Migration("20240829223907_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -161,7 +161,6 @@ namespace TimeOrganizer_net_core.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("Text")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("UserId")
@@ -201,7 +200,6 @@ namespace TimeOrganizer_net_core.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Text")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("UserId")
@@ -238,7 +236,6 @@ namespace TimeOrganizer_net_core.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Text")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("UserId")

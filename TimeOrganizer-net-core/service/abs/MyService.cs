@@ -48,7 +48,7 @@ public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
     {
         return await repository.GetAsQueryable(loggedUserService.GetLoggedUserId()).ProjectTo<TResponse>(mapper.ConfigurationProvider).ToListAsync();
     }
-    public async Task<IEnumerable<SelectOptionResponse>> GetAllAsOptionsAsync()
+    public virtual async Task<IEnumerable<SelectOptionResponse>> GetAllAsOptionsAsync()
     {
         return await repository.GetAsQueryable(loggedUserService.GetLoggedUserId()).ProjectTo<SelectOptionResponse>(mapper.ConfigurationProvider).ToListAsync();
     }

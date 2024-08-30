@@ -181,7 +181,7 @@ namespace TimeOrganizer_net_core.Migrations
                     ModifiedTimestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: false),
+                    Text = table.Column<string>(type: "text", nullable: true),
                     Color = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -206,7 +206,7 @@ namespace TimeOrganizer_net_core.Migrations
                     ModifiedTimestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: false),
+                    Text = table.Column<string>(type: "text", nullable: true),
                     Color = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -286,7 +286,7 @@ namespace TimeOrganizer_net_core.Migrations
                     ModifiedTimestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: false)
+                    Text = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

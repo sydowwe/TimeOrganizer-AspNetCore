@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace TimeOrganizer_net_core.security;
 
 using System.Net.Http;
@@ -19,16 +21,17 @@ public class GoogleRecaptchaService(HttpClient httpClient) : IGoogleRecaptchaSer
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<RecaptchaResponse>(json);
 
-        return result is { Success: true } && result.Score > 0.5 && expectedAction.Equals(result.Action);
+        return result is { success: true } && result.score > 0.5 && expectedAction.Equals(result.action);
     }
 }
 
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public class RecaptchaResponse
 {
-    public bool Success { get; init; }
-    public float Score { get; init; }
-    public string Action { get; init; }
-    public string ChallengeTs { get; init; }
-    public string Hostname { get; init; }
-    public string[] ErrorCodes { get; init; }
+    public bool success { get; init; }
+    public float score { get; init; }
+    public required string action { get; init; }
+    public string? challengeTs { get; init; }
+    public required string hostname { get; init; }
+    public string[]? errorCodes { get; init; }
 }

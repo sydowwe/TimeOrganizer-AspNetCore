@@ -1,6 +1,6 @@
 using TimeOrganizer_net_core.model.DTO.response.generic;
 
-namespace TimeOrganizer_net_core.model.DTO.response;
+namespace TimeOrganizer_net_core.model.DTO.response.activity;
 
 public class ActivityResponse : NameTextResponse
 {

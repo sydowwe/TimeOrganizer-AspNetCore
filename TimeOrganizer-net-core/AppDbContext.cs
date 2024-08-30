@@ -73,12 +73,30 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ILoggedUserSer
                     break;
             }
         }
-        var userId = loggedUserService.GetLoggedUserId();
-        foreach (var entry in ChangeTracker.Entries<AbstractEntityWithUser>())
+        
+        long? userId = null;
+        if (ChangeTracker.Entries<AbstractEntityWithUser>().Any(entry => entry.State == EntityState.Added))
         {
-            if (entry.State == EntityState.Added)
+            if (loggedUserService.IsAuthenticated())
             {
-                entry.Entity.UserId = userId;
+                try
+                {
+                    userId = loggedUserService.GetLoggedUserId();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to get logged user ID: {ex.Message}");
+                }
+            }
+        }
+        if (userId.HasValue)
+        {
+            foreach (var entry in ChangeTracker.Entries<AbstractEntityWithUser>())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.UserId = userId.Value;
+                }
             }
         }
         return await base.SaveChangesAsync(cancellationToken);

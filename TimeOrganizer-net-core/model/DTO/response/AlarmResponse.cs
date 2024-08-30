@@ -1,3 +1,4 @@
+using TimeOrganizer_net_core.model.DTO.response.activity;
 using TimeOrganizer_net_core.model.DTO.response.generic;
 
 namespace TimeOrganizer_net_core.model.DTO.response;

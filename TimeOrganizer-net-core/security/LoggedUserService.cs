@@ -7,6 +7,7 @@ public interface ILoggedUserService
     ClaimsPrincipal GetLoggedUserPrincipal();
     LoggedUser GetLoggedUser();
     long GetLoggedUserId();
+    bool IsAuthenticated();
 }
 
 public class LoggedUserService(IHttpContextAccessor httpContextAccessor) : ILoggedUserService
@@ -23,7 +24,6 @@ public class LoggedUserService(IHttpContextAccessor httpContextAccessor) : ILogg
         {
             throw new Exception("user not authenticated");
         }
-
         return user;
     }
     public LoggedUser GetLoggedUser()
@@ -40,5 +40,18 @@ public class LoggedUserService(IHttpContextAccessor httpContextAccessor) : ILogg
     public long GetLoggedUserId()
     {
         return GetLoggedUser().UserId;
+    }
+
+    public bool IsAuthenticated()
+    {
+        try
+        {
+            GetLoggedUserPrincipal();
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+        return true;
     }
 }

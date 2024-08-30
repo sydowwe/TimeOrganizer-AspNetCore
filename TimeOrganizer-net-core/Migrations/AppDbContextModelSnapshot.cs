@@ -158,7 +158,6 @@ namespace TimeOrganizer_net_core.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("Text")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("UserId")
@@ -198,7 +197,6 @@ namespace TimeOrganizer_net_core.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Text")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("UserId")
@@ -235,7 +233,6 @@ namespace TimeOrganizer_net_core.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Text")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("UserId")
