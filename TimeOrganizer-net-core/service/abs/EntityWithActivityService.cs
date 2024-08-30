@@ -24,8 +24,8 @@ public abstract class EntityWithActivityService<TEntity, TRequest, TResponse, TR
 ) : MyService<TEntity, TRequest, TResponse, TRepository>(repository, loggedUserService, mapper),
     IEntityWithActivityService<TEntity, TRequest, TResponse>
     where TEntity : AbstractEntityWithActivity
-    where TRequest : IActivityIdRequest
-    where TResponse : IEntityWithActivityResponse
+    where TRequest : class, IActivityIdRequest
+    where TResponse : class, IEntityWithActivityResponse
     where TRepository : IEntityWithActivityRepository<TEntity>
 {
     protected readonly IActivityService activityService = activityService;

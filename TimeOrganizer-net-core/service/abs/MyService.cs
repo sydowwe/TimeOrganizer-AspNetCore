@@ -13,22 +13,23 @@ namespace TimeOrganizer_net_core.service.abs;
 public interface IMyService<TEntity, in TRequest, TResponse>
 {
     Task<TResponse> GetByIdAsync(long id);
-    Task<IEnumerable<TResponse>> GetAllAsync();
-    Task<IEnumerable<SelectOptionResponse>> GetAllAsOptionsAsync();
+    Task<List<TResponse>> GetAllAsync();
+    Task<List<SelectOptionResponse>> GetAllAsOptionsAsync();
     Task<TResponse> InsertAsync(TRequest request);
     Task<TResponse> UpdateAsync(long id, TRequest request);
     Task DeleteAsync(long id);
     Task BatchDeleteAsync(IEnumerable<IdRequest> requestList);
+    Task<List<T>> ProjectFromQueryToListAsync<T>(IQueryable<TEntity> query) where T : class, IResponse;
 }
 
 public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
     TRepository repository,
-    ILoggedUserService loggedUserService, 
+    ILoggedUserService loggedUserService,
     IMapper mapper
 ) : IMyService<TEntity, TRequest, TResponse>
     where TEntity : AbstractEntityWithUser
-    where TRequest : IRequest
-    where TResponse : IResponse
+    where TRequest : class, IRequest
+    where TResponse : class, IResponse
     where TRepository : IRepository<TEntity>
 {
     protected readonly TRepository repository = repository;
@@ -44,13 +45,13 @@ public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
         return mapper.Map<TResponse>(entity);
     }
 
-    public async Task<IEnumerable<TResponse>> GetAllAsync()
+    public async Task<List<TResponse>> GetAllAsync()
     {
-        return await repository.GetAsQueryable(loggedUserService.GetLoggedUserId()).ProjectTo<TResponse>(mapper.ConfigurationProvider).ToListAsync();
+        return await ProjectFromQueryToListAsync<TResponse>(repository.GetAsQueryable(loggedUserService.GetLoggedUserId()));
     }
-    public virtual async Task<IEnumerable<SelectOptionResponse>> GetAllAsOptionsAsync()
+    public virtual async Task<List<SelectOptionResponse>> GetAllAsOptionsAsync()
     {
-        return await repository.GetAsQueryable(loggedUserService.GetLoggedUserId()).ProjectTo<SelectOptionResponse>(mapper.ConfigurationProvider).ToListAsync();
+        return await ProjectFromQueryToListAsync<SelectOptionResponse>(repository.GetAsQueryable(loggedUserService.GetLoggedUserId()));
     }
     public async Task<TResponse> InsertAsync(TRequest request)
     {
@@ -87,5 +88,10 @@ public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
     {
         var ids = requestList.Select(req => req.Id);
         await repository.BatchDeleteAsync(i => ids.Contains(i.Id));
+    }
+
+    public async Task<List<T>> ProjectFromQueryToListAsync<T>(IQueryable<TEntity> query) where T : class, IResponse
+    {
+        return await query.ProjectTo<T>(mapper.ConfigurationProvider).ToListAsync();
     }
 }

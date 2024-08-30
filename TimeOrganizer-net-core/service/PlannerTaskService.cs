@@ -1,4 +1,6 @@
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using TimeOrganizer_net_core.model.DTO.request.plannerTask;
 using TimeOrganizer_net_core.model.DTO.response;
 using TimeOrganizer_net_core.model.entity;
@@ -18,8 +20,7 @@ public class PlannerTaskService(IPlannerTaskRepository repository,IActivityServi
 {
     public async Task<List<PlannerTaskResponse>> GetAllByDateAndHourSpan(PlannerFilterRequest request)
     {
-        var endDate = request.FilterDate.AddSeconds(request.HourSpan * 3600);
-        var tasks = await repository.GetAllByDateAndHourSpan(loggedUserService.GetLoggedUserId(), request.FilterDate, endDate);
-        return mapper.Map<List<PlannerTaskResponse>>(tasks);
+        var endDate = request.FilterDate.AddSeconds(request.HourSpan * 3600); 
+        return await ProjectFromQueryToListAsync<PlannerTaskResponse>(repository.GetAllByDateAndHourSpan(loggedUserService.GetLoggedUserId(), request.FilterDate, endDate));
     }
 };

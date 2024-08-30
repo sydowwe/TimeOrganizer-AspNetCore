@@ -11,7 +11,8 @@ public class PlannerTask : AbstractEntityWithIsDone
     public DateTime StartTimestamp { get; set; }
     [Required]
     public int MinuteLength { get; set; }
-    public string Color { get; set; }
+    [StringLength(6)]
+    public string Color { get; set; } = "#1A237E";
 }
 public class PlannerTaskConfiguration : IEntityTypeConfiguration<PlannerTask>
 {

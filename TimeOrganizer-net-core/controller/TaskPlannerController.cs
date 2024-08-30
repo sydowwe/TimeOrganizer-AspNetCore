@@ -11,16 +11,16 @@ namespace TimeOrganizer_net_core.controller;
 
 [ApiController]
 [Route("[controller]")]
-public class PlannerTaskController(IPlannerTaskService service)
+public class TaskPlannerController(IPlannerTaskService service)
     : AbstractWithActivityController<PlannerTask, PlannerTaskRequest, PlannerTaskResponse, IPlannerTaskService>(service)
 {
    
     
-    [HttpPatch("apply-filter")]
-    public async Task<ActionResult<SuccessResponse>> ApplyFilter(PlannerFilterRequest request)
+    [HttpPost("apply-filter")]
+    public async Task<ActionResult<List<PlannerTaskResponse>>> ApplyFilter(PlannerFilterRequest request)
     {
-        await service.GetAllByDateAndHourSpan(request);
-        return Ok(new SuccessResponse("changed"));
+        var result =  await service.GetAllByDateAndHourSpan(request);
+        return Ok(result);
     }
     
     [HttpPatch("change-done")]

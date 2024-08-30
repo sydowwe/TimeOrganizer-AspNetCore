@@ -19,6 +19,11 @@ public class RoleController(IRoleService service) : AbstractCrudController<Role,
         await service.CreateDefaultItems(0);
         return Ok("ok");
     }
+    [HttpPost("get-by-name/{name}")]
+    public async Task<ActionResult<NameTextColorIconResponse>> GetByName([FromRoute] string name)
+    {
+        return Ok(await service.GetByNameAsync(name));
+    }
    
     [NonAction]
     public override Task<ActionResult<NameTextColorIconResponse>> Update(long id, NameTextColorIconRequest request)

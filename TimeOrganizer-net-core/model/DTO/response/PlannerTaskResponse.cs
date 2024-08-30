@@ -4,6 +4,7 @@ namespace TimeOrganizer_net_core.model.DTO.response;
 
 public class PlannerTaskResponse : WithIsDoneResponse
 {
-    private DateTime StartTimestamp { get; set; }
-    private int MinuteLength { get; set; }
+    public DateTime StartTimestamp { get; set; }
+    public int MinuteLength { get; set; }
+    public string Color { get; set; }
 }

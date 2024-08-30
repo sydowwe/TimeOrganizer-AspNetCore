@@ -1,4 +1,6 @@
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using TimeOrganizer_net_core.model.DTO.request;
 using TimeOrganizer_net_core.model.DTO.request.extendable;
 using TimeOrganizer_net_core.model.DTO.response.generic;
@@ -12,11 +14,17 @@ namespace TimeOrganizer_net_core.service;
 public interface IRoleService : IMyService<Role, NameTextColorIconRequest, NameTextColorIconResponse>
 {
     Task CreateDefaultItems(long newUserId);
+    Task<NameTextColorIconResponse?> GetByNameAsync(string name);
 }
 
 public class RoleService(IRoleRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
     : MyService<Role, NameTextColorIconRequest, NameTextColorIconResponse,IRoleRepository>(repository, loggedUserService, mapper), IRoleService
 {
+    //TODO Spravit ako serviceResult
+    public async Task<NameTextColorIconResponse?> GetByNameAsync(string name)
+    {
+        return await repository.GetAsQueryable(loggedUserService.GetLoggedUserId()).Where(r=>r.Name.Equals(name)).ProjectTo<NameTextColorIconResponse>(mapper.ConfigurationProvider).FirstOrDefaultAsync();
+    }
     public async Task CreateDefaultItems(long newUserId)
     {
         await this.repository.AddRangeAsync(
