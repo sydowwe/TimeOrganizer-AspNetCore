@@ -27,7 +27,7 @@ public class Activity : AbstractNameTextEntity
 
     public long? CategoryId { get; set; }
 
-    // public virtual ICollection<Alarm> alarmList { get; set; } = new List<Alarm>();
+    public virtual ICollection<Alarm> alarmList { get; set; } = new List<Alarm>();
     public virtual ICollection<ActivityHistory> HistoryList { get; set; } = new List<ActivityHistory>();
     public virtual ICollection<WebExtensionData> WebExtensionDataList { get; set; } = new List<WebExtensionData>();
 }
@@ -37,10 +37,10 @@ public class ActivityConfiguration : IEntityTypeConfiguration<Activity>
     {
         builder.ToTable("Activity", schema: "public");
         
-        // builder.HasMany(a => a.alarmList)
-        //     .WithOne(w=>w.activity)
-        //     .HasForeignKey(w=>w.activityId)
-        //     .OnDelete(DeleteBehavior.SetNull);
+        builder.HasMany(a => a.alarmList)
+            .WithOne(a=>a.Activity)
+            .HasForeignKey(a=>a.ActivityId)
+            .OnDelete(DeleteBehavior.SetNull);
         
         builder.HasMany(a => a.HistoryList)
             .WithOne(h=>h.Activity)

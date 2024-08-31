@@ -1,5 +1,8 @@
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using TimeOrganizer_net_core.model.DTO.request.activity;
+using TimeOrganizer_net_core.model.DTO.response.activity;
 using TimeOrganizer_net_core.model.DTO.response.generic;
 using TimeOrganizer_net_core.model.entity.abs;
 using TimeOrganizer_net_core.repository;
@@ -14,6 +17,7 @@ public interface
     where TRequest : IActivityIdRequest
     where TResponse : IEntityWithActivityResponse
 {
+    Task<List<ActivityFormSelectOptionsResponse>> GetAllActivityFormSelectOptions();
 }
 
 public abstract class EntityWithActivityService<TEntity, TRequest, TResponse, TRepository>(
@@ -29,4 +33,12 @@ public abstract class EntityWithActivityService<TEntity, TRequest, TResponse, TR
     where TRepository : IEntityWithActivityRepository<TEntity>
 {
     protected readonly IActivityService activityService = activityService;
+
+    public async Task<List<ActivityFormSelectOptionsResponse>> GetAllActivityFormSelectOptions()
+    {
+        var test = await ProjectFromQueryToListAsync<ActivityFormSelectOptionsResponse>(
+            repository.GetDistinctActivities(GetLoggedUserId()));
+        return test;
+    }
+
 }

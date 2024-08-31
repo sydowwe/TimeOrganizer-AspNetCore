@@ -12,6 +12,9 @@ public class ActivityProfile: Profile
     {
         CreateMap<ActivityRequest, Activity>();
         CreateMap<Activity, ActivityResponse>();
-        CreateMap<Activity, ActivitySelectOptionResponse>().ForMember(dest=>dest.Label,opt=>opt.MapFrom(a=>a.Name));
+        CreateMap<Activity, ActivityFormSelectOptionsResponse>()
+            .ForMember(dest=>dest.Label,opt=>opt.MapFrom(a=>a.Name))
+            .ForMember(dest=>dest.RoleOption, opt=>opt.MapFrom(a=>a.Role))
+            .ForMember(dest=>dest.CategoryOption, opt=>opt.MapFrom(a=>a.Category));
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TimeOrganizer_net_core.model.DTO.request.activity;
+using TimeOrganizer_net_core.model.DTO.response.activity;
 using TimeOrganizer_net_core.model.DTO.response.generic;
 using TimeOrganizer_net_core.model.entity.abs;
 using TimeOrganizer_net_core.service.abs;
@@ -11,5 +12,9 @@ public class AbstractWithActivityController<TEntity, TRequest, TResponse, TServi
     where TResponse : IEntityWithActivityResponse
     where TService : IEntityWithActivityService<TEntity, TRequest, TResponse>
 {
-    
+    [HttpPost("get-all-activity-form-select-options")]
+    public async Task<ActionResult<IEnumerable<ActivityFormSelectOptionsResponse>>> GetAllActivityFormSelectOptions()
+    {
+        return Ok(await service.GetAllActivityFormSelectOptions());
+    }
 }

@@ -15,17 +15,16 @@ namespace TimeOrganizer_net_core.service;
 
 public interface IActivityService : IMyService<Activity, ActivityRequest, ActivityResponse>
 {
-    Task<IEnumerable<ActivitySelectOptionResponse>> GetAllAsOptionsAsync();
+    Task<List<ActivityFormSelectOptionsResponse>> GetAllActivityFormSelectOptions();
 }
 
 public class ActivityService(IActivityRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
     : MyService<Activity, ActivityRequest, ActivityResponse, IActivityRepository>(repository, loggedUserService, mapper),
         IActivityService
 {
-    //TODO make activityForm selects methods
-    public new async Task<IEnumerable<ActivitySelectOptionResponse>> GetAllAsOptionsAsync()
+    public async Task<List<ActivityFormSelectOptionsResponse>> GetAllActivityFormSelectOptions()
     {
-        return await repository.GetAsQueryable(loggedUserService.GetLoggedUserId()).ProjectTo<ActivitySelectOptionResponse>(mapper.ConfigurationProvider).ToListAsync();
+        return await ProjectFromQueryToListAsync<ActivityFormSelectOptionsResponse>(repository.GetAsQueryable(GetLoggedUserId()));
     }
     public async Task<ActivityResponse> QuickUpdateAsync(long id, NameTextRequest request)
     {

@@ -19,7 +19,7 @@ public interface IMyService<TEntity, in TRequest, TResponse>
     Task<TResponse> UpdateAsync(long id, TRequest request);
     Task DeleteAsync(long id);
     Task BatchDeleteAsync(IEnumerable<IdRequest> requestList);
-    Task<List<T>> ProjectFromQueryToListAsync<T>(IQueryable<TEntity> query) where T : class, IResponse;
+    Task<List<T>> ProjectFromQueryToListAsync<T>(IQueryable<AbstractEntity> query) where T : class, IResponse;
 }
 
 public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
@@ -90,8 +90,14 @@ public abstract class MyService<TEntity, TRequest, TResponse, TRepository>(
         await repository.BatchDeleteAsync(i => ids.Contains(i.Id));
     }
 
-    public async Task<List<T>> ProjectFromQueryToListAsync<T>(IQueryable<TEntity> query) where T : class, IResponse
+    public async Task<List<TR>> ProjectFromQueryToListAsync<TR>(IQueryable<AbstractEntity> query) 
+        where TR : class, IResponse
     {
-        return await query.ProjectTo<T>(mapper.ConfigurationProvider).ToListAsync();
+        return await query.ProjectTo<TR>(mapper.ConfigurationProvider).ToListAsync();
+    }
+
+    protected long GetLoggedUserId()
+    {
+        return loggedUserService.GetLoggedUserId();
     }
 }

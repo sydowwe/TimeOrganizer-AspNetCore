@@ -15,8 +15,8 @@ public interface IActivityHistoryService : IEntityWithActivityService<ActivityHi
     Task<List<ActivityHistoryListGroupedByDateResponse>> FilterAsync(ActivityHistoryFilterRequest filterRequest);
 }
 
-public class ActivityHistoryService(IActivityHistoryRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
-    : MyService<ActivityHistory, ActivityHistoryRequest, ActivityHistoryResponse, IActivityHistoryRepository>(repository, loggedUserService, mapper), IActivityHistoryService
+public class ActivityHistoryService(IActivityHistoryRepository repository, IActivityService activityService, ILoggedUserService loggedUserService, IMapper mapper)
+    : EntityWithActivityService<ActivityHistory, ActivityHistoryRequest, ActivityHistoryResponse, IActivityHistoryRepository>(repository, activityService, loggedUserService, mapper), IActivityHistoryService
 {
        public async Task<List<ActivityHistoryListGroupedByDateResponse>> FilterAsync(ActivityHistoryFilterRequest filterRequest)
     {

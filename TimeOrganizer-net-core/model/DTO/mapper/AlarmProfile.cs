@@ -5,11 +5,11 @@ using TimeOrganizer_net_core.model.entity;
 
 namespace TimeOrganizer_net_core.model.DTO.mapper;
 
-// public class AlarmProfile : Profile
-// {
-//     public AlarmProfile()
-//     {
-//         CreateMap<AlarmRequest, Alarm>();
-//         CreateMap<Alarm, AlarmResponse>();
-//     }
-// }
+public class AlarmProfile : Profile
+{
+    public AlarmProfile()
+    {
+        CreateMap<AlarmRequest, Alarm>();
+        CreateMap<Alarm, AlarmResponse>();
+    }
+}

@@ -19,9 +19,9 @@ public class ActivityController(IActivityService service)
     {
         return base.GetAllOptions();
     }
-    [HttpPost("get-all-options")]
-    public async Task<ActionResult<IEnumerable<ActivitySelectOptionResponse>>> GetAllActivityOptions()
+    [HttpPost("get-all-activity-form-select-options")]
+    public async Task<ActionResult<IEnumerable<ActivityFormSelectOptionsResponse>>> GetAllActivityFormSelectOptions()
     {
-        return Ok(await service.GetAllAsOptionsAsync());
+        return Ok(await service.GetAllActivityFormSelectOptions());
     }
 }
