@@ -36,9 +36,8 @@ public abstract class EntityWithActivityService<TEntity, TRequest, TResponse, TR
 
     public async Task<List<ActivityFormSelectOptionsResponse>> GetAllActivityFormSelectOptions()
     {
-        var test = await ProjectFromQueryToListAsync<ActivityFormSelectOptionsResponse>(
+        return await ProjectFromQueryToListAsync<ActivityFormSelectOptionsResponse>(
             repository.GetDistinctActivities(GetLoggedUserId()));
-        return test;
     }
 
 }

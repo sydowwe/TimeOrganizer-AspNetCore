@@ -21,7 +21,7 @@ public interface IActivityService : IMyService<Activity, ActivityRequest, Activi
 public class ActivityService(IActivityRepository repository, ILoggedUserService loggedUserService, IMapper mapper)
     : MyService<Activity, ActivityRequest, ActivityResponse, IActivityRepository>(repository, loggedUserService, mapper),
         IActivityService
-{
+{ 
     public async Task<List<ActivityFormSelectOptionsResponse>> GetAllActivityFormSelectOptions()
     {
         return await ProjectFromQueryToListAsync<ActivityFormSelectOptionsResponse>(repository.GetAsQueryable(GetLoggedUserId()));

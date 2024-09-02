@@ -29,6 +29,6 @@ public class EntityWithActivityRepository<T>(AppDbContext context)
     }
     public IQueryable<Activity> GetDistinctActivities(long userId)
     {
-        return dbSet.Where(e => e.UserId == userId).DistinctBy(e=>e.ActivityId).Select(e=>e.Activity);
+        return dbSet.Where(e => e.UserId == userId).Select(e=>e.Activity).Distinct();
     }
 }
