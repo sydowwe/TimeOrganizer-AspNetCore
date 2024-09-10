@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using TimeOrganizer_net_core.exception;
 
 namespace TimeOrganizer_net_core.security;
 
@@ -7,6 +8,7 @@ public interface ILoggedUserService
     ClaimsPrincipal GetLoggedUserPrincipal();
     LoggedUser GetLoggedUser();
     long GetLoggedUserId();
+    TimeZoneInfo GetLoggedUserTimezone();
     bool IsAuthenticated();
 }
 
@@ -31,15 +33,20 @@ public class LoggedUserService(IHttpContextAccessor httpContextAccessor) : ILogg
         var user = GetLoggedUserPrincipal();
         return new LoggedUser
         {
-            UserId = long.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new InvalidOperationException("Id missing in claims")),
-            Email = user.FindFirst(ClaimTypes.Email)?.Value ?? throw new InvalidOperationException("Missing email in claims"),
+            UserId = long.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new ClaimMissingException("ID")),
+            Email = user.FindFirst(ClaimTypes.Email)?.Value ?? throw new ClaimMissingException("EMAIL"),
             Roles = user.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList(),
+            Timezone = TimeZoneInfo.FindSystemTimeZoneById(user?.FindFirst("timezone")?.Value ?? throw new ClaimMissingException("TIMEZONE"))
         };
     }
 
     public long GetLoggedUserId()
     {
         return GetLoggedUser().UserId;
+    }
+    public TimeZoneInfo GetLoggedUserTimezone()
+    {
+        return GetLoggedUser().Timezone;
     }
 
     public bool IsAuthenticated()

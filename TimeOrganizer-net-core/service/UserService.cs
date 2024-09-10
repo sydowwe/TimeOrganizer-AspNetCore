@@ -1,4 +1,5 @@
 using System.Security.Authentication;
+using System.Security.Claims;
 using QRCoder;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
@@ -126,6 +127,8 @@ public class UserService(
         user.Timezone = TimeZoneInfo.FindSystemTimeZoneById(loginRequest.Timezone);
         //TODO robi zbytocne query na username treba odstranit
         await userManager.UpdateAsync(user);
+        await userManager.RemoveClaimsAsync(user, new List<Claim> { new Claim("timezone", loginRequest.Timezone) });
+        var r = await userManager.AddClaimAsync(user, new Claim("timezone", loginRequest.Timezone));
         return ServiceResult<LoginResponse>.Successful(
             new LoginResponse
             {

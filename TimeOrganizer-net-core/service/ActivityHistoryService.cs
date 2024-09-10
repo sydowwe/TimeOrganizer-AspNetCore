@@ -10,24 +10,35 @@ using TimeOrganizer_net_core.service.abs;
 
 namespace TimeOrganizer_net_core.service;
 
-public interface IActivityHistoryService : IEntityWithActivityService<ActivityHistory, ActivityHistoryRequest, ActivityHistoryResponse>
+public interface
+    IActivityHistoryService : IEntityWithActivityService<ActivityHistory, ActivityHistoryRequest,
+    ActivityHistoryResponse>
 {
     Task<List<ActivityHistoryListGroupedByDateResponse>> FilterAsync(ActivityHistoryFilterRequest filterRequest);
 }
 
-public class ActivityHistoryService(IActivityHistoryRepository repository, IActivityService activityService, ILoggedUserService loggedUserService, IMapper mapper)
-    : EntityWithActivityService<ActivityHistory, ActivityHistoryRequest, ActivityHistoryResponse, IActivityHistoryRepository>(repository, activityService, loggedUserService, mapper), IActivityHistoryService
+public class ActivityHistoryService(
+    IActivityHistoryRepository repository,
+    IActivityService activityService,
+    ILoggedUserService loggedUserService,
+    IMapper mapper)
+    : EntityWithActivityService<ActivityHistory, ActivityHistoryRequest, ActivityHistoryResponse,
+        IActivityHistoryRepository>(repository, activityService, loggedUserService, mapper), IActivityHistoryService
 {
-       public async Task<List<ActivityHistoryListGroupedByDateResponse>> FilterAsync(ActivityHistoryFilterRequest filterRequest)
+    private readonly ILoggedUserService _loggedUserService = loggedUserService;
+
+    public async Task<List<ActivityHistoryListGroupedByDateResponse>> FilterAsync(
+        ActivityHistoryFilterRequest filterRequest)
     {
-        var query = repository.ApplyFilters(loggedUserService.GetLoggedUserId(), filterRequest);
+        var query = repository.ApplyFilters(_loggedUserService.GetLoggedUserId(), filterRequest);
 
-        var historyResponses = await query.OrderBy(h=>h.StartTimestamp)
+        var historyResponses = await query.OrderBy(h => h.StartTimestamp)
             .ProjectTo<ActivityHistoryResponse>(mapper.ConfigurationProvider).ToListAsync();
-
+        
         return historyResponses
-            .GroupBy(hr => hr.StartTimestamp.ToUniversalTime().Date)
-            .Select(group => new ActivityHistoryListGroupedByDateResponse(group.Key, group.OrderBy(h=>h.StartTimestamp).ToList()))
+            .GroupBy(hr => TimeZoneInfo.ConvertTimeFromUtc(hr.StartTimestamp, _loggedUserService.GetLoggedUserTimezone()).Date)
+            .Select(group =>
+                new ActivityHistoryListGroupedByDateResponse(group.Key, group.OrderBy(h => h.StartTimestamp).ToList()))
             .OrderBy(response => response.Date)
             .ToList();
     }

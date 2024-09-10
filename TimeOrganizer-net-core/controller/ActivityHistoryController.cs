@@ -11,4 +11,10 @@ namespace TimeOrganizer_net_core.controller;
 [Route("[controller]")]
 public class ActivityHistoryController(IActivityHistoryService service) : AbstractWithActivityController<ActivityHistory, ActivityHistoryRequest, ActivityHistoryResponse, IActivityHistoryService>(service)
 {
+    [HttpPost("apply-filter")]
+    public async Task<ActionResult<List<ActivityHistoryListGroupedByDateResponse>>> ApplyFilter(ActivityHistoryFilterRequest request)
+    {
+        var result =  await service.FilterAsync(request);
+        return Ok(result);
+    }
 }
