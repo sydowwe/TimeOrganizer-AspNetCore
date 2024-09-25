@@ -88,13 +88,13 @@ public class UserService(
     }
     public async Task<ServiceResult<LoginResponse>> LoginUserAsync(LoginRequest loginRequest)
     {
-        // if (!await googleRecaptchaService.verifyRecaptchaAsync(loginRequest.recaptchaToken, "login"))
-        // {
-        //     return ServiceResult<LoginResponse>.Error(
-        //         ServiceResultErrorType.BadRequest,
-        //         "Wrong captcha token or action"
-        //     );
-        // }
+        if (!await googleRecaptchaService.VerifyRecaptchaAsync(loginRequest.RecaptchaToken, "login"))
+        {
+            return ServiceResult<LoginResponse>.Error(
+                ServiceResultErrorType.BadRequest,
+                "Wrong captcha token or action"
+            );
+        } 
         var userResult = await GetByEmailAsync(loginRequest.Email);
         if (!userResult.Success)
         {
@@ -129,6 +129,7 @@ public class UserService(
         return ServiceResult<LoginResponse>.Successful(
             new LoginResponse
             {
+                Email = loginRequest.Email,
                 RequiresTwoFactor = result.RequiresTwoFactor,
                 CurrentLocale = user.CurrentLocale
             });
@@ -148,25 +149,9 @@ public class UserService(
     {
         await signInManager.SignOutAsync();
     }
-
-    public async Task<ServiceResult> ConfirmEmail(string? email, string? code)
-    {
-        if (email == null || code == null)
-        {
-            return ServiceResult.Error(ServiceResultErrorType.BadRequest, "UserId and Code must be supplied");
-        }
-
-        var userResult = await GetByEmailAsync(email);
-        if (!userResult.Success)
-        {
-            return ServiceResult.Error(userResult.ErrorType, userResult.ErrorMessage);
-        }
-
-        var result = await userManager.ConfirmEmailAsync(userResult.Data, code);
-        return result.Succeeded
-            ? ServiceResult.Successful()
-            : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
-    }
+   
+    //TODO email sender and test these methods
+    #region emailSenderNeeded
     public async Task<ServiceResult> ForgotPassword(string email)
     {
         var userResult = await GetByEmailAsync(email);
@@ -200,15 +185,26 @@ public class UserService(
             : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
     }
 
-    public async Task<ServiceResult> ChangePasswordAsync(string currentPassword, string newPassword)
+    public async Task<ServiceResult> ConfirmEmail(string? email, string? code)
     {
-        var user = await GetLoggedUserAsync();
-        var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        if (email == null || code == null)
+        {
+            return ServiceResult.Error(ServiceResultErrorType.BadRequest, "UserId and Code must be supplied");
+        }
+
+        var userResult = await GetByEmailAsync(email);
+        if (!userResult.Success)
+        {
+            return ServiceResult.Error(userResult.ErrorType, userResult.ErrorMessage);
+        }
+
+        var result = await userManager.ConfirmEmailAsync(userResult.Data, code);
         return result.Succeeded
             ? ServiceResult.Successful()
             : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
     }
-
+    #endregion
+    
     public async Task<ServiceResult> ChangeCurrentLocaleAsync(AvailableLocales locale)
     {
         var user = await GetLoggedUserAsync();
@@ -218,14 +214,12 @@ public class UserService(
             ? ServiceResult.Successful()
             : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
     }
-
     public async Task<bool> WereSensitiveChangesMadeAsync(UserRequest changedUser)
     {
         var loggedUser = await GetLoggedUserAsync();
         return !(loggedUser.Email!.Equals(changedUser.Email) &&
                  loggedUser.TwoFactorEnabled == changedUser.TwoFactorEnabled);
     }
-
     public async Task<bool> ValidatePasswordAndReturnTwoFactorAuthStatusAsync(string password)
     {
         var loggedUser = await GetLoggedUserAsync();
@@ -236,11 +230,18 @@ public class UserService(
         }
         return loggedUser.TwoFactorEnabled;
     }
-
     public async Task<bool> ValidateTwoFactorAuthAsync(string code)
     {
         return await userManager.VerifyTwoFactorTokenAsync(await GetLoggedUserAsync(),
             TokenOptions.DefaultAuthenticatorProvider, code);
+    }
+    public async Task<ServiceResult> ChangePasswordAsync(string currentPassword, string newPassword)
+    {
+        var user = await GetLoggedUserAsync();
+        var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        return result.Succeeded
+            ? ServiceResult.Successful()
+            : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
     }
 
     public async Task<UserResponse> GetLoggedUserDataAsync()
@@ -262,7 +263,7 @@ public class UserService(
         }
         await signInManager.RefreshSignInAsync(loggedUser);
 
-        mapper.Map(loggedUser, request);
+        mapper.Map(request,loggedUser);
         await userManager.UpdateAsync(loggedUser);
         return new EditedUserResponse(mapper.Map<UserResponse>(loggedUser))
         {

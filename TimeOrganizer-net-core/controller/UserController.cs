@@ -126,8 +126,8 @@ public class UserController(IUserService userService) : ControllerBase
         return Ok();
     }
 
-    [HttpPost("change-locale")]
-    public async Task<IActionResult> ChangeCurrentLocaleAsync([FromBody] AvailableLocales locale)
+    [HttpPut("change-locale/{locale}")]
+    public async Task<IActionResult> ChangeCurrentLocaleAsync([FromRoute] AvailableLocales locale)
     {
         var result = await userService.ChangeCurrentLocaleAsync(locale);
         if (!result.Success)
@@ -149,7 +149,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpPost("validate-password")]
-    public async Task<IActionResult> ValidatePasswordAndReturnTwoFactorAuthStatusAsync([FromQuery] string password)
+    public async Task<IActionResult> ValidatePasswordAndReturnTwoFactorAuthStatusAsync([FromBody] string password)
     {
         var result = await userService.ValidatePasswordAndReturnTwoFactorAuthStatusAsync(password);
         return Ok(result);
@@ -169,7 +169,7 @@ public class UserController(IUserService userService) : ControllerBase
         return Ok(userResponse);
     }
 
-    [HttpPost("edit")]
+    [HttpPut("edit")]
     public async Task<IActionResult> EditUserDataAsync([FromBody] UserRequest request)
     {
         var result = await userService.EditUserDataAsync(request);

@@ -23,7 +23,7 @@ public class User : IdentityUser<long>
     // Surname
     [Required] public string Surname { get; set; }
 
-    // Stay Logged In
+    // TODO REMOVE
     [Required] public bool IsStayLoggedIn { get; set; }
 
     // Current Locale
