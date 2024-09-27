@@ -16,16 +16,15 @@ public interface IUserService
 {
     Task<ServiceResult<RegistrationResponse>> RegisterUserAsync(RegistrationRequest registration);
     Task<ServiceResult<LoginResponse>> LoginUserAsync(LoginRequest loginRequest);
-    Task<ServiceResult> ValidateTwoFactorAuthLoginAsync(GoogleAuthLoginRequest request);
+    Task<ServiceResult> ValidateTwoFactorAuthForLoginAsync(TwoFactorAuthLoginRequest request);
     Task Logout(HttpContext context);
     Task<ServiceResult> ConfirmEmail(string? email, string? code);
     Task<ServiceResult> ForgotPassword(string email);
     Task<ServiceResult> ResetPassword(ResetPasswordRequest request);
-    Task<ServiceResult> ChangePasswordAsync(string currentPassword, string newPassword);
+    Task<ServiceResult> ChangePasswordAsync(ChangePasswordRequest request);
+    Task<ServiceResult> VerifyUserAsync(VerifyUserRequest request);
     Task<ServiceResult> ChangeCurrentLocaleAsync(AvailableLocales locale);
-    Task<bool> WereSensitiveChangesMadeAsync(UserRequest changedUser);
-    Task<bool> ValidatePasswordAndReturnTwoFactorAuthStatusAsync(string password);
-    Task<bool> ValidateTwoFactorAuthAsync(string code);
+    Task<bool> GetTwoFactorAuthStatusAsync();
     Task<UserResponse> GetLoggedUserDataAsync();
     Task<EditedUserResponse> EditUserDataAsync(UserRequest request);
     Task<ServiceResult> DeleteUserAccountAsync();
@@ -103,11 +102,9 @@ public class UserService(
         var user = userResult.Data;
         var result = await signInManager.PasswordSignInAsync(user, loginRequest.Password,
             loginRequest.StayLoggedIn, true);
-        if (result.IsNotAllowed)
+        if (result.RequiresTwoFactor)
         {
-            await userManager.AccessFailedAsync(user);
-            return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.AuthenticationFailed,
-                "Wrong email or password");
+            return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.TwoFactorAuthRequired, "Two factor authentication required to proceed with login");
         }
         if (result.IsLockedOut)
         {
@@ -117,12 +114,17 @@ public class UserService(
             return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.UserLockedOut,
                 $"User locked out for {minutes}m {seconds}s");
         }
+        if (result.IsNotAllowed)
+        {
+            await userManager.AccessFailedAsync(user);
+            return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.AuthenticationFailed,
+                "Wrong email or password");
+        }
         if (!result.Succeeded)
         {
             ServiceResult<LoginResponse>.Error(ServiceResultErrorType.InternalServerError, result.ToString());
         }
         user.IsStayLoggedIn = loginRequest.StayLoggedIn;
-        user.CurrentLocale = loginRequest.CurrentLocale;
         user.Timezone = TimeZoneInfo.FindSystemTimeZoneById(loginRequest.Timezone);
         //TODO robi zbytocne query na username treba odstranit
         await userManager.UpdateAsync(user);
@@ -130,14 +132,14 @@ public class UserService(
             new LoginResponse
             {
                 Email = loginRequest.Email,
-                RequiresTwoFactor = result.RequiresTwoFactor,
+                RequiresTwoFactor = false,
                 CurrentLocale = user.CurrentLocale
             });
     }
 
-    public async Task<ServiceResult> ValidateTwoFactorAuthLoginAsync(GoogleAuthLoginRequest request)
+    public async Task<ServiceResult> ValidateTwoFactorAuthForLoginAsync(TwoFactorAuthLoginRequest request)
     {
-        var result = await signInManager.TwoFactorAuthenticatorSignInAsync(request.Code,request.StayLoggedIn,request.RememberClient);
+        var result = await signInManager.TwoFactorAuthenticatorSignInAsync(request.Token,request.StayLoggedIn,request.RememberClient);
         if (!result.Succeeded)
         {
             ServiceResult.Error(ServiceResultErrorType.InternalServerError, result.ToString());
@@ -214,36 +216,57 @@ public class UserService(
             ? ServiceResult.Successful()
             : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
     }
-    public async Task<bool> WereSensitiveChangesMadeAsync(UserRequest changedUser)
+   
+
+    public async Task<bool> GetTwoFactorAuthStatusAsync()
     {
-        var loggedUser = await GetLoggedUserAsync();
-        return !(loggedUser.Email!.Equals(changedUser.Email) &&
-                 loggedUser.TwoFactorEnabled == changedUser.TwoFactorEnabled);
+        return loggedUserService.GetLoggedUserTwoFactorAuthStatus() ?? (await GetLoggedUserAsync()).TwoFactorEnabled;
     }
-    public async Task<bool> ValidatePasswordAndReturnTwoFactorAuthStatusAsync(string password)
-    {
-        var loggedUser = await GetLoggedUserAsync();
-        var result = await signInManager.CheckPasswordSignInAsync(loggedUser, password, false);
-        if (!result.Succeeded)
-        {
-            throw new AuthenticationException();
-        }
-        return loggedUser.TwoFactorEnabled;
-    }
-    public async Task<bool> ValidateTwoFactorAuthAsync(string code)
+    private async Task<bool> ValidateTwoFactorAuthAsync(string token)
     {
         return await userManager.VerifyTwoFactorTokenAsync(await GetLoggedUserAsync(),
-            TokenOptions.DefaultAuthenticatorProvider, code);
+            TokenOptions.DefaultAuthenticatorProvider, token);
     }
-    public async Task<ServiceResult> ChangePasswordAsync(string currentPassword, string newPassword)
+    public async Task<ServiceResult> ChangePasswordAsync(ChangePasswordRequest request)
     {
         var user = await GetLoggedUserAsync();
-        var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        if (user.TwoFactorEnabled)
+        {
+            if (string.IsNullOrEmpty(request.TwoFactorAuthToken))
+            {
+                return ServiceResult.Error(ServiceResultErrorType.TwoFactorAuthRequired, "Two-factor authentication is required to proceed.");
+            }
+            var isTokenValid = await ValidateTwoFactorAuthAsync(request.TwoFactorAuthToken);
+            if (!isTokenValid)
+            {
+                return ServiceResult.Error(ServiceResultErrorType.InvalidTwoFactorAuthToken, "Invalid two-factor authentication token.");
+            }
+        }
+        var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
         return result.Succeeded
             ? ServiceResult.Successful()
             : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
     }
-
+    public async Task<ServiceResult> VerifyUserAsync(VerifyUserRequest request)
+    {
+        var user = await GetLoggedUserAsync();
+        if (user.TwoFactorEnabled)
+        {
+            if (string.IsNullOrEmpty(request.TwoFactorAuthToken))
+            {
+                return ServiceResult.Error(ServiceResultErrorType.TwoFactorAuthRequired, "Two-factor authentication is required to proceed");
+            }
+            var isTokenValid = await ValidateTwoFactorAuthAsync(request.TwoFactorAuthToken);
+            if (!isTokenValid)
+            {
+                return ServiceResult.Error(ServiceResultErrorType.InvalidTwoFactorAuthToken, "Invalid two-factor authentication token");
+            }
+        }
+        var result = await userManager.CheckPasswordAsync(user, request.Password);
+        return result
+            ? ServiceResult.Successful()
+            : ServiceResult.Error(ServiceResultErrorType.AuthenticationFailed, "Wrong password");
+    }
     public async Task<UserResponse> GetLoggedUserDataAsync()
     {
         var loggedUser = await GetLoggedUserAsync();
@@ -340,9 +363,13 @@ public class UserService(
         {
             throw new UserByPrincipalNotFoundException(principal);
         }
-
         return user;
     }
+    // protected long GetLoggedUserId()
+    // {
+    //     return loggedUserService.GetLoggedUserId();
+    // }
+    
     // private async Task<User> GetByIdAsync(long id)
     // {
     //     var user = await userManager.FindByIdAsync(id.ToString());

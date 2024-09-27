@@ -11,6 +11,7 @@ namespace TimeOrganizer_net_core.controller;
 [Route("[controller]")]
 public class UserController(IUserService userService) : ControllerBase
 {
+    #region unauthincated
     [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> RegisterUserAsync([FromBody] RegistrationRequest registrationRequest)
@@ -47,9 +48,9 @@ public class UserController(IUserService userService) : ControllerBase
     }
     
     [HttpPost("login-2fa")]
-    public async Task<IActionResult> ValidateTwoFactorAuthLoginAsync([FromBody] GoogleAuthLoginRequest googleAuthLoginRequest)
+    public async Task<IActionResult> ValidateTwoFactorAuthLoginAsync([FromBody] TwoFactorAuthLoginRequest twoFactorAuthLoginRequest)
     {
-        var result = await userService.ValidateTwoFactorAuthLoginAsync(googleAuthLoginRequest);
+        var result = await userService.ValidateTwoFactorAuthForLoginAsync(twoFactorAuthLoginRequest);
         if (!result.Success)
         {
             StatusCode(StatusCodes.Status500InternalServerError, result.ErrorMessage);
@@ -105,27 +106,14 @@ public class UserController(IUserService userService) : ControllerBase
         }
         return Ok();
     }
+    #endregion
+
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
         await userService.Logout(HttpContext);
         return Ok();
     }
-    [HttpPost("change-password")]
-    public async Task<IActionResult> ChangePasswordAsync([FromQuery] string currentPassword, [FromQuery] string newPassword)
-    {
-        var result = await userService.ChangePasswordAsync(currentPassword, newPassword);
-        if (!result.Success)
-        {
-            return result.ErrorType switch
-            {
-                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError, "Error with UserManager"),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
-            };
-        }
-        return Ok();
-    }
-
     [HttpPut("change-locale/{locale}")]
     public async Task<IActionResult> ChangeCurrentLocaleAsync([FromRoute] AvailableLocales locale)
     {
@@ -141,32 +129,30 @@ public class UserController(IUserService userService) : ControllerBase
         return Ok();
     }
 
-    [HttpPost("sensitive-changes")]
-    public async Task<IActionResult> WereSensitiveChangesMadeAsync([FromBody] UserRequest changedUser)
-    {
-        var result = await userService.WereSensitiveChangesMadeAsync(changedUser);
-        return Ok(result);
-    }
-
-    [HttpPost("validate-password")]
-    public async Task<IActionResult> ValidatePasswordAndReturnTwoFactorAuthStatusAsync([FromBody] string password)
-    {
-        var result = await userService.ValidatePasswordAndReturnTwoFactorAuthStatusAsync(password);
-        return Ok(result);
-    }
-
-    [HttpPost("validate-2fa")]
-    public async Task<IActionResult> ValidateTwoFactorAuthAsync([FromQuery] string code)
-    {
-        var result = await userService.ValidateTwoFactorAuthAsync(code);
-        return Ok(result);
-    }
 
     [HttpPost("data")]
     public async Task<IActionResult> GetLoggedUserDataAsync()
     {
         var userResponse = await userService.GetLoggedUserDataAsync();
         return Ok(userResponse);
+    }
+    [HttpPost("get-2fa-status")]
+    public async Task<IActionResult> GetTwoFactorAuthStatusAsync()
+    {
+        return Ok(await userService.GetTwoFactorAuthStatusAsync());
+    }
+    [HttpPost("verify")]
+    public async Task<IActionResult> VerifyUserAsync([FromBody] VerifyUserRequest request)
+    {
+        var result = await userService.VerifyUserAsync(request);
+        if (!result.Success)
+        {
+            return result.ErrorType switch
+            {
+                _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
+            };
+        }
+        return Ok();
     }
 
     [HttpPut("edit")]
@@ -175,7 +161,20 @@ public class UserController(IUserService userService) : ControllerBase
         var result = await userService.EditUserDataAsync(request);
         return Ok(result);
     }
-
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordRequest request)
+    {
+        var result = await userService.ChangePasswordAsync(request);
+        if (!result.Success)
+        {
+            return result.ErrorType switch
+            {
+                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError, "Error with UserManager"),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
+            };
+        }
+        return Ok();
+    }
     [HttpPost("delete-account")]
     public async Task<IActionResult> DeleteUserAccountAsync()
     {

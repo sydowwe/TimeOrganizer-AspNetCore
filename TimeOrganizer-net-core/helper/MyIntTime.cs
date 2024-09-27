@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace TimeOrganizer_net_core.helper;
@@ -7,6 +8,13 @@ public class MyIntTime
     public int Hours { get;  }
     public int Minutes { get; }
     public int Seconds { get; }
+    [JsonConstructor]
+    public MyIntTime(int hours, int minutes, int seconds)
+    {
+        this.Hours = hours;
+        this.Minutes = minutes;
+        this.Seconds = seconds;
+    }
     public MyIntTime(int seconds)
     {
         this.Hours = seconds / 3600;

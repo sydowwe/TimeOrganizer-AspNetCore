@@ -10,4 +10,6 @@ public enum ServiceResultErrorType
     BadRequest,
     Conflict,
     InternalServerError,
+    TwoFactorAuthRequired,
+    InvalidTwoFactorAuthToken
 }
