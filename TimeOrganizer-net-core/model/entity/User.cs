@@ -17,22 +17,10 @@ public enum AvailableLocales
 
 public class User : IdentityUser<long>
 {
-    // Name
-    [Required] public string Name { get; set; }
-
-    // Surname
-    [Required] public string Surname { get; set; }
-
-    // TODO REMOVE
-    [Required] public bool IsStayLoggedIn { get; set; }
-
-    // Current Locale
     [Required] public AvailableLocales CurrentLocale { get; set; } = AvailableLocales.Sk;
 
-    // Timezone
     [Required] public TimeZoneInfo Timezone { get; set; } // Assuming ZoneIdDBConverter is for ZoneId, store as string
     
-    // Navigation properties for related entities
     public virtual ICollection<Activity> ActivityList { get; set; } = new List<Activity>();
     public virtual ICollection<Category> CategoryList { get; set; } = new List<Category>();
     public virtual ICollection<ActivityHistory> ActivityHistoryList { get; set; } = new List<ActivityHistory>();
@@ -67,27 +55,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         // Indexes
         builder.HasIndex(u => u.Email).IsUnique(); // Unique constraint on Email
 
-        // Property configurations
-        builder.Property(u => u.Name)
-            .IsRequired()
-            .HasMaxLength(100); // Adjust length as needed
-
-        builder.Property(u => u.Surname)
-            .IsRequired()
-            .HasMaxLength(100); // Adjust length as needed
-
         builder.Property(u => u.Email)
             .IsRequired()
             .HasMaxLength(256); // Adjust length as needed
 
         builder.Property(u => u.PasswordHash)
             .IsRequired();
-
-        builder.Property(u => u.IsStayLoggedIn)
-            .IsRequired();
-
-
-
         builder.Property(u => u.CurrentLocale)
             .HasConversion(
                 v => v.ToString(),

@@ -13,7 +13,7 @@ public class UserProfile : Profile
         CreateMap<RegistrationRequest, User>();
         CreateMap<LoginRequest, User>();
         
-        CreateMap<User, RegistrationResponse>();
+        CreateMap<User, TwoFactorAuthResponse>();
         CreateMap<User, LoginResponse>();
         CreateMap<User, Oauth2LoginResponse>();
         CreateMap<User, UserResponse>();

@@ -41,12 +41,15 @@ public class UserController(IUserService userService) : ControllerBase
                 ServiceResultErrorType.AuthenticationFailed => Unauthorized(result.ErrorMessage),
                 ServiceResultErrorType.UserLockedOut => StatusCode(StatusCodes.Status423Locked, result.ErrorMessage),
                 ServiceResultErrorType.InternalServerError => StatusCode(StatusCodes.Status500InternalServerError, result.ErrorMessage),
+                ServiceResultErrorType.NotFound => StatusCode(StatusCodes.Status404NotFound, result.ErrorMessage),
+                ServiceResultErrorType.TwoFactorAuthRequired => StatusCode(StatusCodes.Status401Unauthorized, result.ErrorMessage),
                 _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
             };
         }
+
         return Ok(result.Data);
     }
-    
+    [AllowAnonymous]
     [HttpPost("login-2fa")]
     public async Task<IActionResult> ValidateTwoFactorAuthLoginAsync([FromBody] TwoFactorAuthLoginRequest twoFactorAuthLoginRequest)
     {
@@ -141,25 +144,24 @@ public class UserController(IUserService userService) : ControllerBase
     {
         return Ok(await userService.GetTwoFactorAuthStatusAsync());
     }
-    [HttpPost("verify")]
-    public async Task<IActionResult> VerifyUserAsync([FromBody] VerifyUserRequest request)
+    [HttpPost("toggle-two-factor-auth")]
+    public async Task<IActionResult> ToggleTwoFactorAuth([FromBody] VerifyUserRequest request)
     {
-        var result = await userService.VerifyUserAsync(request);
+        return Ok(await userService.ToggleTwoFactorAuthAsync(request));
+    }
+    [HttpPost("change-email")]
+    public async Task<IActionResult> ChangeEmailAsync([FromBody] ChangeEmailRequest request)
+    {
+        var result = await userService.ChangeEmailAsync(request);
         if (!result.Success)
         {
             return result.ErrorType switch
             {
+                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError, "Error with UserManager"),
                 _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
             };
         }
         return Ok();
-    }
-
-    [HttpPut("edit")]
-    public async Task<IActionResult> EditUserDataAsync([FromBody] UserRequest request)
-    {
-        var result = await userService.EditUserDataAsync(request);
-        return Ok(result);
     }
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordRequest request)
@@ -175,10 +177,11 @@ public class UserController(IUserService userService) : ControllerBase
         }
         return Ok();
     }
+    //TODO Dokoncit error types
     [HttpPost("delete-account")]
-    public async Task<IActionResult> DeleteUserAccountAsync()
+    public async Task<IActionResult> DeleteUserAccountAsync([FromBody] VerifyUserRequest request)
     {
-        var result = await userService.DeleteUserAccountAsync();
+        var result = await userService.DeleteUserAccountAsync(request);
         if (!result.Success)
         {
             return result.ErrorType switch

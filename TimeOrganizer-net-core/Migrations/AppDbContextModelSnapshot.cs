@@ -184,7 +184,8 @@ namespace TimeOrganizer_net_core.Migrations
 
                     b.Property<string>("Color")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
 
                     b.Property<DateTime>("CreatedTimestamp")
                         .HasColumnType("timestamp with time zone");
@@ -220,7 +221,8 @@ namespace TimeOrganizer_net_core.Migrations
 
                     b.Property<string>("Color")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
 
                     b.Property<DateTime>("CreatedTimestamp")
                         .HasColumnType("timestamp with time zone");
@@ -351,19 +353,11 @@ namespace TimeOrganizer_net_core.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsStayLoggedIn")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -385,11 +379,6 @@ namespace TimeOrganizer_net_core.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
-
-                    b.Property<string>("Surname")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Timezone")
                         .IsRequired()
@@ -521,7 +510,8 @@ namespace TimeOrganizer_net_core.Migrations
 
                     b.Property<string>("Color")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
 
                     b.Property<bool>("IsDone")
                         .HasColumnType("boolean");
@@ -758,9 +748,9 @@ namespace TimeOrganizer_net_core.Migrations
             modelBuilder.Entity("TimeOrganizer_net_core.model.entity.Alarm", b =>
                 {
                     b.HasOne("TimeOrganizer_net_core.model.entity.Activity", "Activity")
-                        .WithMany()
+                        .WithMany("alarmList")
                         .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
                     b.HasOne("TimeOrganizer_net_core.model.entity.User", "User")
@@ -871,6 +861,8 @@ namespace TimeOrganizer_net_core.Migrations
                     b.Navigation("HistoryList");
 
                     b.Navigation("WebExtensionDataList");
+
+                    b.Navigation("alarmList");
                 });
 
             modelBuilder.Entity("TimeOrganizer_net_core.model.entity.Category", b =>

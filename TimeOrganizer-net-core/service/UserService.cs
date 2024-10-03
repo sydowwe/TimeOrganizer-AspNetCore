@@ -14,21 +14,21 @@ namespace TimeOrganizer_net_core.service;
 
 public interface IUserService
 {
-    Task<ServiceResult<RegistrationResponse>> RegisterUserAsync(RegistrationRequest registration);
+    Task<ServiceResult<TwoFactorAuthResponse>> RegisterUserAsync(RegistrationRequest registration);
     Task<ServiceResult<LoginResponse>> LoginUserAsync(LoginRequest loginRequest);
     Task<ServiceResult> ValidateTwoFactorAuthForLoginAsync(TwoFactorAuthLoginRequest request);
     Task Logout(HttpContext context);
     Task<ServiceResult> ConfirmEmail(string? email, string? code);
     Task<ServiceResult> ForgotPassword(string email);
     Task<ServiceResult> ResetPassword(ResetPasswordRequest request);
+    Task<ServiceResult> ChangeEmailAsync(ChangeEmailRequest request);
     Task<ServiceResult> ChangePasswordAsync(ChangePasswordRequest request);
-    Task<ServiceResult> VerifyUserAsync(VerifyUserRequest request);
+    Task<ServiceResult> ToggleTwoFactorAuthAsync(VerifyUserRequest request);
+    Task<ServiceResult> DeleteUserAccountAsync(VerifyUserRequest request);
     Task<ServiceResult> ChangeCurrentLocaleAsync(AvailableLocales locale);
     Task<bool> GetTwoFactorAuthStatusAsync();
     Task<UserResponse> GetLoggedUserDataAsync();
-    Task<EditedUserResponse> EditUserDataAsync(UserRequest request);
-    Task<ServiceResult> DeleteUserAccountAsync();
-    Task<byte[]?> GetTwoFactorAuthQrCodeAsync(User? user = null);
+    Task<string?> GetTwoFactorAuthQrCodeAsync(User? user = null);
     Task<IEnumerable<string>?> GenerateTwoFactorAuthScratchCodesAsync(User? user = null);
 }
 
@@ -44,47 +44,53 @@ public class UserService(
     IMapper mapper,
     IConfiguration configuration) : IUserService
 {
-    public async Task<ServiceResult<RegistrationResponse>> RegisterUserAsync(RegistrationRequest registration)
+    public async Task<ServiceResult<TwoFactorAuthResponse>> RegisterUserAsync(RegistrationRequest registration)
     {
         if (!await googleRecaptchaService.VerifyRecaptchaAsync(registration.RecaptchaToken, "register"))
         {
-            return ServiceResult<RegistrationResponse>.Error(
+            return ServiceResult<TwoFactorAuthResponse>.Error(
                 ServiceResultErrorType.BadRequest,
                 "Wrong captcha token  or action"
             );
         }
+
         var newUser = new User
         {
-            Name = registration.name,
-            Surname = registration.surname,
             Email = registration.Email,
             UserName = registration.Email,
             TwoFactorEnabled = registration.TwoFactorEnabled,
             CurrentLocale = registration.CurrentLocale,
             Timezone = TimeZoneInfo.FindSystemTimeZoneById(registration.Timezone),
-            IsStayLoggedIn = false
         };
         var result = await userManager.CreateAsync(newUser, registration.Password);
         if (!result.Succeeded)
         {
-            if (result.Errors.Any(e => e.Code is "DuplicateUserName" or "DuplicateEmail"))
-            {
-                return ServiceResult<RegistrationResponse>.Error(ServiceResultErrorType.Conflict, "User already exists with EMAIL: " + newUser.Email);
-            }
-            return ServiceResult<RegistrationResponse>.Error(ServiceResultErrorType.BadRequest, "Failed to register user because: " + string.Join(", ", result.Errors.Select(e => e.Description)));
-
+            return result.Errors.Any(e => e.Code is "DuplicateUserName" or "DuplicateEmail")
+                ? ServiceResult<TwoFactorAuthResponse>.Error(ServiceResultErrorType.Conflict,
+                    "User already exists with EMAIL: " + newUser.Email)
+                : ServiceResult<TwoFactorAuthResponse>.Error(ServiceResultErrorType.BadRequest,
+                    "Failed to register user because: " + string.Join(", ", result.Errors.Select(e => e.Description)));
         }
-        var recoveryCodes = await GenerateTwoFactorAuthScratchCodesAsync(newUser);
-        var qrCode = await GetTwoFactorAuthQrCodeAsync(newUser);
+
         await SetDefaultSettingsAsync(newUser.Id);
-        return ServiceResult<RegistrationResponse>.Successful(
-            new RegistrationResponse
+
+        if (!newUser.TwoFactorEnabled)
+        {
+            return ServiceResult<TwoFactorAuthResponse>.Successful(
+                new TwoFactorAuthResponse
+                {
+                    TwoFactorEnabled = false,
+                });
+        }
+        return ServiceResult<TwoFactorAuthResponse>.Successful(
+            new TwoFactorAuthResponse
             {
                 TwoFactorEnabled = newUser.TwoFactorEnabled,
-                QrCode = qrCode,
-                RecoveryCodes = recoveryCodes
+                QrCode = await GetTwoFactorAuthQrCodeAsync(newUser),
+                RecoveryCodes = await GenerateTwoFactorAuthScratchCodesAsync(newUser)
             });
     }
+
     public async Task<ServiceResult<LoginResponse>> LoginUserAsync(LoginRequest loginRequest)
     {
         if (!await googleRecaptchaService.VerifyRecaptchaAsync(loginRequest.RecaptchaToken, "login"))
@@ -93,19 +99,19 @@ public class UserService(
                 ServiceResultErrorType.BadRequest,
                 "Wrong captcha token or action"
             );
-        } 
+        }
+
         var userResult = await GetByEmailAsync(loginRequest.Email);
         if (!userResult.Success)
         {
             return ServiceResult<LoginResponse>.Error(userResult.ErrorType, userResult.ErrorMessage);
         }
+
         var user = userResult.Data;
         var result = await signInManager.PasswordSignInAsync(user, loginRequest.Password,
             loginRequest.StayLoggedIn, true);
-        if (result.RequiresTwoFactor)
-        {
-            return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.TwoFactorAuthRequired, "Two factor authentication required to proceed with login");
-        }
+     
+
         if (result.IsLockedOut)
         {
             var lockoutDuration = user.LockoutEnd!.Value - DateTimeOffset.Now;
@@ -114,32 +120,33 @@ public class UserService(
             return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.UserLockedOut,
                 $"User locked out for {minutes}m {seconds}s");
         }
+
         if (result.IsNotAllowed)
         {
             await userManager.AccessFailedAsync(user);
             return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.AuthenticationFailed,
                 "Wrong email or password");
         }
-        if (!result.Succeeded)
+        if (result is { Succeeded: false, RequiresTwoFactor: false })
         {
-            ServiceResult<LoginResponse>.Error(ServiceResultErrorType.InternalServerError, result.ToString());
+            return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.InternalServerError, result.ToString());
         }
-        user.IsStayLoggedIn = loginRequest.StayLoggedIn;
         user.Timezone = TimeZoneInfo.FindSystemTimeZoneById(loginRequest.Timezone);
-        //TODO robi zbytocne query na username treba odstranit
         await userManager.UpdateAsync(user);
         return ServiceResult<LoginResponse>.Successful(
             new LoginResponse
             {
                 Email = loginRequest.Email,
-                RequiresTwoFactor = false,
+                RequiresTwoFactor = result.RequiresTwoFactor,
                 CurrentLocale = user.CurrentLocale
             });
     }
 
     public async Task<ServiceResult> ValidateTwoFactorAuthForLoginAsync(TwoFactorAuthLoginRequest request)
     {
-        var result = await signInManager.TwoFactorAuthenticatorSignInAsync(request.Token,request.StayLoggedIn,request.RememberClient);
+        var result =
+            await signInManager.TwoFactorAuthenticatorSignInAsync(request.Token, request.StayLoggedIn,
+                false);
         if (!result.Succeeded)
         {
             ServiceResult.Error(ServiceResultErrorType.InternalServerError, result.ToString());
@@ -151,9 +158,11 @@ public class UserService(
     {
         await signInManager.SignOutAsync();
     }
-   
+
     //TODO email sender and test these methods
+
     #region emailSenderNeeded
+
     public async Task<ServiceResult> ForgotPassword(string email)
     {
         var userResult = await GetByEmailAsync(email);
@@ -166,10 +175,11 @@ public class UserService(
         {
             return ServiceResult.Error(ServiceResultErrorType.EmailNotConfirmed, "User doesn't have email confirmed");
         }
+
         var token = await userManager.GeneratePasswordResetTokenAsync(userResult.Data);
         await emailService.SendEmailAsync(
-            email, 
-            $"Password reset - {configuration["App:Name"]}", 
+            email,
+            $"Password reset - {configuration["App:Name"]}",
             emailService.GenerateForgottenPasswordEmail(token));
         return ServiceResult.Successful();
     }
@@ -181,6 +191,7 @@ public class UserService(
         {
             return ServiceResult.Error(userResult.ErrorType, userResult.ErrorMessage);
         }
+
         var result = await userManager.ResetPasswordAsync(userResult.Data, request.ResetCode, request.NewPassword);
         return result.Succeeded
             ? ServiceResult.Successful()
@@ -205,8 +216,9 @@ public class UserService(
             ? ServiceResult.Successful()
             : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
     }
+
     #endregion
-    
+
     public async Task<ServiceResult> ChangeCurrentLocaleAsync(AvailableLocales locale)
     {
         var user = await GetLoggedUserAsync();
@@ -216,16 +228,51 @@ public class UserService(
             ? ServiceResult.Successful()
             : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
     }
-   
+
 
     public async Task<bool> GetTwoFactorAuthStatusAsync()
     {
         return loggedUserService.GetLoggedUserTwoFactorAuthStatus() ?? (await GetLoggedUserAsync()).TwoFactorEnabled;
     }
+
     private async Task<bool> ValidateTwoFactorAuthAsync(string token)
     {
         return await userManager.VerifyTwoFactorTokenAsync(await GetLoggedUserAsync(),
             TokenOptions.DefaultAuthenticatorProvider, token);
+    }
+    public async Task<ServiceResult> ChangeEmailAsync(ChangeEmailRequest request)
+    {
+        var user = await GetLoggedUserAsync();
+        IdentityResult? result;
+        if (user.TwoFactorEnabled)
+        {
+            if (string.IsNullOrEmpty(request.TwoFactorAuthToken))
+            {
+                return ServiceResult.Error(ServiceResultErrorType.TwoFactorAuthRequired,
+                    "Two-factor authentication is required to proceed.");
+            }
+
+            var isTokenValid = await ValidateTwoFactorAuthAsync(request.TwoFactorAuthToken);
+            if (!isTokenValid)
+            {
+                return ServiceResult.Error(ServiceResultErrorType.InvalidTwoFactorAuthToken,
+                    "Invalid two-factor authentication token.");
+            }
+            // result = await userManager.ChangeEmailAsync(user, request.NewEmail, await userManager.GenerateChangeEmailTokenAsync(user,request.NewEmail));
+        }
+        else
+        {   
+            //Bez 2fa treba poslat email s tokenom a ten overit spravi takisto aj pri hesle
+            // result = await userManager.ChangeEmailAsync(user, request.NewEmail, request.TwoFactorAuthToken);
+        }
+        result = await userManager.ChangeEmailAsync(user, request.NewEmail, await userManager.GenerateChangeEmailTokenAsync(user,request.NewEmail));
+        if (!result.Succeeded)
+        {
+            return ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
+        }
+        await userManager.UpdateSecurityStampAsync(user);
+        await signInManager.SignOutAsync();
+        return ServiceResult.Successful();
     }
     public async Task<ServiceResult> ChangePasswordAsync(ChangePasswordRequest request)
     {
@@ -234,100 +281,145 @@ public class UserService(
         {
             if (string.IsNullOrEmpty(request.TwoFactorAuthToken))
             {
-                return ServiceResult.Error(ServiceResultErrorType.TwoFactorAuthRequired, "Two-factor authentication is required to proceed.");
+                return ServiceResult.Error(ServiceResultErrorType.TwoFactorAuthRequired,
+                    "Two-factor authentication is required to proceed.");
             }
+
             var isTokenValid = await ValidateTwoFactorAuthAsync(request.TwoFactorAuthToken);
             if (!isTokenValid)
             {
-                return ServiceResult.Error(ServiceResultErrorType.InvalidTwoFactorAuthToken, "Invalid two-factor authentication token.");
+                return ServiceResult.Error(ServiceResultErrorType.InvalidTwoFactorAuthToken,
+                    "Invalid two-factor authentication token.");
             }
         }
         var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
-        return result.Succeeded
-            ? ServiceResult.Successful()
-            : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
+        if (!result.Succeeded)
+        {
+            return ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
+        }
+        await userManager.UpdateSecurityStampAsync(user);
+        await signInManager.SignOutAsync();
+        return ServiceResult.Successful();
     }
-    public async Task<ServiceResult> VerifyUserAsync(VerifyUserRequest request)
+
+    private async Task<ServiceResult> VerifyUserAsync(VerifyUserRequest request)
     {
         var user = await GetLoggedUserAsync();
         if (user.TwoFactorEnabled)
         {
             if (string.IsNullOrEmpty(request.TwoFactorAuthToken))
             {
-                return ServiceResult.Error(ServiceResultErrorType.TwoFactorAuthRequired, "Two-factor authentication is required to proceed");
+                return ServiceResult.Error(ServiceResultErrorType.TwoFactorAuthRequired,
+                    "Two-factor authentication is required to proceed");
             }
+
             var isTokenValid = await ValidateTwoFactorAuthAsync(request.TwoFactorAuthToken);
             if (!isTokenValid)
             {
-                return ServiceResult.Error(ServiceResultErrorType.InvalidTwoFactorAuthToken, "Invalid two-factor authentication token");
+                return ServiceResult.Error(ServiceResultErrorType.InvalidTwoFactorAuthToken,
+                    "Invalid two-factor authentication token");
             }
         }
+
         var result = await userManager.CheckPasswordAsync(user, request.Password);
         return result
             ? ServiceResult.Successful()
             : ServiceResult.Error(ServiceResultErrorType.AuthenticationFailed, "Wrong password");
     }
-    public async Task<UserResponse> GetLoggedUserDataAsync()
-    {
-        var loggedUser = await GetLoggedUserAsync();
-        return mapper.Map<UserResponse>(loggedUser);
-    }
-    //TODO FINISH 
-    public async Task<EditedUserResponse> EditUserDataAsync(UserRequest request)
-    {
-        var loggedUser = await GetLoggedUserAsync();
-        byte[]? qrCode = null;
-        IEnumerable<string>? scratchCodes = null;
 
-        if (!loggedUser.TwoFactorEnabled && request.TwoFactorEnabled)
+    public async Task<ServiceResult> ToggleTwoFactorAuthAsync(VerifyUserRequest request)
+    {
+        var user = await GetLoggedUserAsync();
+        if (!await userManager.CheckPasswordAsync(user, request.Password))
         {
-            qrCode = await GetTwoFactorAuthQrCodeAsync(loggedUser) ?? throw new InvalidOperationException();
-            scratchCodes = await GenerateTwoFactorAuthScratchCodesAsync(loggedUser);
+            ServiceResult.Error(ServiceResultErrorType.AuthenticationFailed, "Wrong password");
         }
-        await signInManager.RefreshSignInAsync(loggedUser);
-
-        mapper.Map(request,loggedUser);
-        await userManager.UpdateAsync(loggedUser);
-        return new EditedUserResponse(mapper.Map<UserResponse>(loggedUser))
+        if (user.TwoFactorEnabled)
         {
-            QrCode = qrCode,
-            ScratchCodes = scratchCodes
-        };
+            if (string.IsNullOrEmpty(request.TwoFactorAuthToken))
+            {
+                return ServiceResult.Error(ServiceResultErrorType.TwoFactorAuthRequired,
+                    "Two-factor authentication is required to proceed.");
+            }
+
+            var isTokenValid = await ValidateTwoFactorAuthAsync(request.TwoFactorAuthToken);
+            if (!isTokenValid)
+            {
+                return ServiceResult.Error(ServiceResultErrorType.InvalidTwoFactorAuthToken,
+                    "Invalid two-factor authentication token.");
+            }
+        }
+        user.TwoFactorEnabled = !user.TwoFactorEnabled;
+        var result = await userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            return ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
+        }
+        
+        if (!user.TwoFactorEnabled)
+        {
+            return ServiceResult<TwoFactorAuthResponse>.Successful(
+                new TwoFactorAuthResponse
+                {
+                    TwoFactorEnabled = false,
+                });
+        }
+        await userManager.UpdateSecurityStampAsync(user);
+        await signInManager.SignOutAsync();
+        return ServiceResult<TwoFactorAuthResponse>.Successful(
+            new TwoFactorAuthResponse
+            {
+                TwoFactorEnabled = true,
+                QrCode = await GetTwoFactorAuthQrCodeAsync(user),
+                RecoveryCodes = await GenerateTwoFactorAuthScratchCodesAsync(user)
+            });
     }
 
-
-    public async Task<ServiceResult> DeleteUserAccountAsync()
+    public async Task<ServiceResult> DeleteUserAccountAsync(VerifyUserRequest request)
     {
+        var verifyResult = await VerifyUserAsync(request);
+        if (!verifyResult.Success)
+        {
+            return verifyResult;
+        }
+
         var result = await userManager.DeleteAsync(await GetLoggedUserAsync());
         return result.Succeeded
             ? ServiceResult.Successful()
             : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
     }
 
-    public async Task<byte[]?> GetTwoFactorAuthQrCodeAsync(User? user = null)
+    public async Task<UserResponse> GetLoggedUserDataAsync()
+    {
+        var loggedUser = await GetLoggedUserAsync();
+        return mapper.Map<UserResponse>(loggedUser);
+    }
+
+    public async Task<string?> GetTwoFactorAuthQrCodeAsync(User? user = null)
     {
         user ??= await GetLoggedUserAsync();
-        if (user.TwoFactorEnabled)
+        if (!user.TwoFactorEnabled)
         {
             return null;
         }
+
         var totpAuthenticatorKey = await userManager.GetAuthenticatorKeyAsync(user);
         if (string.IsNullOrEmpty(totpAuthenticatorKey))
         {
             await userManager.ResetAuthenticatorKeyAsync(user);
             totpAuthenticatorKey = await userManager.GetAuthenticatorKeyAsync(user);
         }
+
         return GenerateQrCode(totpAuthenticatorKey!, user.Email!);
     }
 
     public async Task<IEnumerable<string>?> GenerateTwoFactorAuthScratchCodesAsync(User? user = null)
     {
         user ??= await GetLoggedUserAsync();
-        if (user.TwoFactorEnabled)
+        if (!user.TwoFactorEnabled)
         {
             return null;
         }
-
         return await userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 5) ??
                throw new InvalidOperationException("2Fa scratch codes generation failed");
     }
@@ -341,9 +433,9 @@ public class UserService(
 
     private async Task SendConfirmationEmail(User user)
     {
-        
     }
-    private static byte[] GenerateQrCode(string secretKey, string userEmail)
+
+    private static string GenerateQrCode(string secretKey, string userEmail)
     {
         var appName = Environment.GetEnvironmentVariable("APP_NAME") ??
                       throw new Exception("No environment variable APP_NAME");
@@ -352,7 +444,7 @@ public class UserService(
         using var qrGenerator = new QRCodeGenerator();
         using var qrCodeData = qrGenerator.CreateQrCode(otpAuthUrl, QRCodeGenerator.ECCLevel.Q);
         using var qrCode = new PngByteQRCode(qrCodeData);
-        return qrCode.GetGraphic(20);
+        return Convert.ToBase64String(qrCode.GetGraphic(3));
     }
 
     private async Task<User> GetLoggedUserAsync()
@@ -363,13 +455,14 @@ public class UserService(
         {
             throw new UserByPrincipalNotFoundException(principal);
         }
+
         return user;
     }
     // protected long GetLoggedUserId()
     // {
     //     return loggedUserService.GetLoggedUserId();
     // }
-    
+
     // private async Task<User> GetByIdAsync(long id)
     // {
     //     var user = await userManager.FindByIdAsync(id.ToString());
@@ -384,7 +477,7 @@ public class UserService(
     {
         var user = await userManager.FindByEmailAsync(email);
         return user == null
-            ? ServiceResult<User>.Error(ServiceResultErrorType.NotFound, $"User with EMAIL: {email} was not found")
+            ? ServiceResult<User>.Error(ServiceResultErrorType.NotFound, $"User with EMAIL: '{email}' was not found")
             : ServiceResult<User>.Successful(user);
     }
 }
