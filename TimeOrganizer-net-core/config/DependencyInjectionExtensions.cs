@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Identity;
 using TimeOrganizer_net_core.helper;
+using TimeOrganizer_net_core.helper.Sessions;
 using TimeOrganizer_net_core.model.DTO.mapper;
+using TimeOrganizer_net_core.model.entity;
 using TimeOrganizer_net_core.repository;
 using TimeOrganizer_net_core.security;
 using TimeOrganizer_net_core.service;
@@ -27,10 +30,11 @@ public static class DependencyInjectionExtensions
         //User Service
         services.AddScoped<ILoggedUserService, LoggedUserService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUserSessionService, UserSessionService>();
         services.AddHttpClient<IGoogleRecaptchaService, GoogleRecaptchaService>();
         // Configure mail settings
         // services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
-        services.AddTransient<IEmailService, EmailService>();
+        services.AddTransient<IEmailSender<User>, EmailSender>();
 
         //Service
         services.AddScoped<IAlarmService, AlarmService>();

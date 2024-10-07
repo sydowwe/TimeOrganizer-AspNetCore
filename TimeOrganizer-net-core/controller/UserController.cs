@@ -11,13 +11,14 @@ namespace TimeOrganizer_net_core.controller;
 [Route("[controller]")]
 public class UserController(IUserService userService) : ControllerBase
 {
-    #region unauthincated
+    #region NotAuthenicated
+
     [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> RegisterUserAsync([FromBody] RegistrationRequest registrationRequest)
     {
         var result = await userService.RegisterUserAsync(registrationRequest);
-        if (!result.Success)
+        if (!result.Succeeded)
         {
             return result.ErrorType switch
             {
@@ -26,47 +27,54 @@ public class UserController(IUserService userService) : ControllerBase
                 _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
             };
         }
+
         return Ok(result.Data);
     }
+
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> LoginUserAsync([FromBody] LoginRequest loginRequest)
     {
         var result = await userService.LoginUserAsync(loginRequest);
-        if (!result.Success)
+        if (!result.Succeeded)
         {
             return result.ErrorType switch
             {
                 ServiceResultErrorType.BadRequest => BadRequest(result.ErrorMessage),
                 ServiceResultErrorType.AuthenticationFailed => Unauthorized(result.ErrorMessage),
                 ServiceResultErrorType.UserLockedOut => StatusCode(StatusCodes.Status423Locked, result.ErrorMessage),
-                ServiceResultErrorType.InternalServerError => StatusCode(StatusCodes.Status500InternalServerError, result.ErrorMessage),
+                ServiceResultErrorType.InternalServerError => StatusCode(StatusCodes.Status500InternalServerError,
+                    result.ErrorMessage),
                 ServiceResultErrorType.NotFound => StatusCode(StatusCodes.Status404NotFound, result.ErrorMessage),
-                ServiceResultErrorType.TwoFactorAuthRequired => StatusCode(StatusCodes.Status401Unauthorized, result.ErrorMessage),
+                ServiceResultErrorType.TwoFactorAuthRequired => StatusCode(StatusCodes.Status401Unauthorized,
+                    result.ErrorMessage),
                 _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
             };
         }
 
         return Ok(result.Data);
     }
+
     [AllowAnonymous]
     [HttpPost("login-2fa")]
-    public async Task<IActionResult> ValidateTwoFactorAuthLoginAsync([FromBody] TwoFactorAuthLoginRequest twoFactorAuthLoginRequest)
+    public async Task<IActionResult> ValidateTwoFactorAuthLoginAsync(
+        [FromBody] TwoFactorAuthLoginRequest twoFactorAuthLoginRequest)
     {
         var result = await userService.ValidateTwoFactorAuthForLoginAsync(twoFactorAuthLoginRequest);
-        if (!result.Success)
+        if (!result.Succeeded)
         {
             StatusCode(StatusCodes.Status500InternalServerError, result.ErrorMessage);
         }
+
         return Ok();
     }
-  
+
     [AllowAnonymous]
-    [HttpPost("confirm-email")]
+    [HttpGet("confirm-email")]
     public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string code)
     {
         var result = await userService.ConfirmEmail(email, code);
-        if (!result.Success)
+        if (!result.Succeeded)
         {
             return result.ErrorType switch
             {
@@ -75,14 +83,16 @@ public class UserController(IUserService userService) : ControllerBase
                 _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
             };
         }
+
         return Ok();
     }
+
     [AllowAnonymous]
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromQuery] string email)
     {
         var result = await userService.ForgotPassword(email);
-        if (!result.Success)
+        if (!result.Succeeded)
         {
             return result.ErrorType switch
             {
@@ -91,24 +101,29 @@ public class UserController(IUserService userService) : ControllerBase
                 _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
             };
         }
+
         return Ok();
     }
+
     [AllowAnonymous]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest resetPasswordRequest)
     {
         var result = await userService.ResetPassword(resetPasswordRequest);
-        if (!result.Success)
+        if (!result.Succeeded)
         {
             return result.ErrorType switch
             {
-                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError, "Error with UserManager"),
+                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error with UserManager"),
                 ServiceResultErrorType.NotFound => NotFound(result.ErrorMessage),
                 _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
             };
         }
+
         return Ok();
     }
+
     #endregion
 
     [HttpPost("logout")]
@@ -117,21 +132,25 @@ public class UserController(IUserService userService) : ControllerBase
         await userService.Logout(HttpContext);
         return Ok();
     }
+
     [HttpPut("change-locale/{locale}")]
     public async Task<IActionResult> ChangeCurrentLocaleAsync([FromRoute] AvailableLocales locale)
     {
         var result = await userService.ChangeCurrentLocaleAsync(locale);
-        if (!result.Success)
+        if (!result.Succeeded)
         {
             return result.ErrorType switch
             {
-                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError, "Error with UserManager"),
+                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error with UserManager"),
                 _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
             };
         }
+
         return Ok();
     }
 
+    #region UserSettings
 
     [HttpPost("data")]
     public async Task<IActionResult> GetLoggedUserDataAsync()
@@ -139,79 +158,105 @@ public class UserController(IUserService userService) : ControllerBase
         var userResponse = await userService.GetLoggedUserDataAsync();
         return Ok(userResponse);
     }
+
     [HttpPost("get-2fa-status")]
     public async Task<IActionResult> GetTwoFactorAuthStatusAsync()
     {
         return Ok(await userService.GetTwoFactorAuthStatusAsync());
     }
+
     [HttpPost("toggle-two-factor-auth")]
     public async Task<IActionResult> ToggleTwoFactorAuth([FromBody] VerifyUserRequest request)
     {
         return Ok(await userService.ToggleTwoFactorAuthAsync(request));
     }
+
     [HttpPost("change-email")]
     public async Task<IActionResult> ChangeEmailAsync([FromBody] ChangeEmailRequest request)
     {
         var result = await userService.ChangeEmailAsync(request);
-        if (!result.Success)
+        if (!result.Succeeded)
         {
             return result.ErrorType switch
             {
-                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError, "Error with UserManager"),
+                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error with UserManager"),
                 _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
             };
         }
+
         return Ok();
     }
+
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordRequest request)
     {
         var result = await userService.ChangePasswordAsync(request);
-        if (!result.Success)
+        if (!result.Succeeded)
         {
             return result.ErrorType switch
             {
-                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError, "Error with UserManager"),
+                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error with UserManager"),
                 _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
             };
         }
+
         return Ok();
     }
+
     //TODO Dokoncit error types
     [HttpPost("delete-account")]
     public async Task<IActionResult> DeleteUserAccountAsync([FromBody] VerifyUserRequest request)
     {
         var result = await userService.DeleteUserAccountAsync(request);
-        if (!result.Success)
+        if (!result.Succeeded)
         {
             return result.ErrorType switch
             {
-                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError, "Error with UserManager"),
+                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error with UserManager"),
                 _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
             };
         }
+
         return Ok();
     }
 
-    [HttpPost("2fa-qr-code")]
-    public async Task<IActionResult> GetTwoFactorAuthQrCodeAsync()
+    [HttpPost("new-2fa-qr-code")]
+    public async Task<IActionResult> GetTwoFactorAuthQrCodeAsync([FromBody] VerifyUserRequest request)
     {
-        var qrCode = await userService.GetTwoFactorAuthQrCodeAsync();
-        if (qrCode == null)
+        var result = await userService.GenerateNewTwoFactorAuthQrCodeAsync(request);
+        if (!result.Succeeded)
         {
-            return BadRequest("Failed to generate QR code");
+            return result.ErrorType switch
+            {
+                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error when generating new secret: " + result.ErrorMessage),
+                ServiceResultErrorType.NotFound => StatusCode(StatusCodes.Status404NotFound,
+                    "Error when getting new secret: " + result.ErrorMessage),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
+            };
         }
-        return File(qrCode, "image/png");
+        return Ok(result.Data);
     }
 
-    [HttpPost("2fa-scratch-codes")]
-    public async Task<IActionResult> GenerateTwoFactorAuthScratchCodesAsync()
+    [HttpPost("new-2fa-recovery-codes")]
+    public async Task<IActionResult> GenerateNewTwoFactorAuthRecoveryCodesAsync([FromBody] VerifyUserRequest request)
     {
-        var scratchCodes = await userService.GenerateTwoFactorAuthScratchCodesAsync();
-        if (scratchCodes == null)
+        var result = await userService.GenerateNewTwoFactorAuthRecoveryCodesAsync(request);
+        if (!result.Succeeded)
         {
-            return BadRequest("Failed to generate scratch codes");
+            return result.ErrorType switch
+            {
+                ServiceResultErrorType.IdentityError => StatusCode(StatusCodes.Status500InternalServerError,
+                    result.ErrorMessage),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
+            };
         }
-        return Ok(scratchCodes);
+
+        return Ok(result.Data);
     }
+
+    #endregion
 }

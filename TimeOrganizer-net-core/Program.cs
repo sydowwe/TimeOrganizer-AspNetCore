@@ -31,7 +31,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         corsBuilder =>
         {
-            corsBuilder.WithOrigins("http://localhost:3000","http://localhost:5104", Environment.GetEnvironmentVariable("CORS_ENABLED_URL") ?? throw new EnvironmentVariableMissingException("CORS_ENABLED_URL"))
+            corsBuilder.WithOrigins("http://localhost:3000","http://localhost:5104", Helper.GetEnvVar("PAGE_URL"))
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();

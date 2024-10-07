@@ -7,7 +7,7 @@ namespace TimeOrganizer_net_core.model.DTO;
 
 public class ServiceResult
 {
-    public bool Success { get; set; }
+    public bool Succeeded { get; set; }
     public ServiceResultErrorType? ErrorType { get; set; }
     public string? ErrorMessage { get; set; }
 
@@ -15,7 +15,7 @@ public class ServiceResult
     {
         return new ServiceResult
         {
-            Success = true,
+            Succeeded = true,
         };
     }
     
@@ -23,7 +23,7 @@ public class ServiceResult
     {
         return new ServiceResult
         {
-            Success = false,
+            Succeeded = false,
             ErrorType = errorType,
             ErrorMessage = errorMessage,
         };
@@ -37,7 +37,7 @@ public class ServiceResult<T> : ServiceResult where T : class
     {
         return new ServiceResult<T>
         {
-            Success = true,
+            Succeeded = true,
             Data = data
         };
     }
@@ -46,7 +46,7 @@ public class ServiceResult<T> : ServiceResult where T : class
     {
         return new ServiceResult<T>
         {
-            Success = false,
+            Succeeded = false,
             ErrorType = errorType,
             ErrorMessage = errorMessage,
         };;

@@ -1,7 +1,8 @@
+using TimeOrganizer_net_core.model.DTO.request.extendable;
+
 namespace TimeOrganizer_net_core.model.DTO.request.user;
 
-public class ResetPasswordRequest : EmailRequest
+public class ResetPasswordRequest : IRequest
 {
-    public string ResetCode { get; set; }
     public string NewPassword { get; set; }
 }

@@ -21,7 +21,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "LOGGING_LEVEL":"Information",
         "PORT":"8080",
-        "CORS_ENABLED_URL": "https://localhost:3000",
+        "PAGE_URL": "https://localhost:3000",
         "APP_NAME": "TimeOrganizer",
 
         "MAIL_SMTP_SERVER":"smtp.example.com",

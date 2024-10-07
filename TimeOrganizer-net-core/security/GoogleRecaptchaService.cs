@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using TimeOrganizer_net_core.helper;
 
 namespace TimeOrganizer_net_core.security;
 
@@ -17,7 +18,7 @@ public class GoogleRecaptchaService(HttpClient httpClient) : IGoogleRecaptchaSer
 
     public async Task<bool> VerifyRecaptchaAsync(string token, string expectedAction)
     {
-        var response = await httpClient.PostAsync($"{RecaptchaApiUrl}?secret={Environment.GetEnvironmentVariable("RECAPTCHA_SECRET")}&response={token}", null);
+        var response = await httpClient.PostAsync($"{RecaptchaApiUrl}?secret={Helper.GetEnvVar("RECAPTCHA_SECRET")}&response={token}", null);
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<RecaptchaResponse>(json);
 
