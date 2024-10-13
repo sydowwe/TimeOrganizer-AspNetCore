@@ -6,21 +6,25 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 
-public class EmailSender : IEmailSender<User>
+public interface IMyEmailSender<T> : IEmailSender<T> where T: IdentityUser<long>
 {
-    private readonly string _smtpServer = Helper.GetEnvVar("EmailSender_SMTP_Server");
-    private readonly int _smtpPort = int.Parse(Helper.GetEnvVar("EmailSender_SMTP_Port"));
-    private readonly string _smtpUsername = Helper.GetEnvVar("EmailSender_SMTP_Username");
-    private readonly string _smtpPassword = Helper.GetEnvVar("EmailSender_SMTP_Password");
-    private readonly string _myEmail = Helper.GetEnvVar("EmailSender_MyEmail");
-    private readonly string _appName = Helper.GetEnvVar("AppName");
-    private readonly string _appLogo = Helper.GetEnvVar("AppLogo");
+    Task SendEmailAsync(string email, string subject, string htmlMessage);
+}
+public class EmailSender(IConfiguration configuration) : IMyEmailSender<User>
+{
+    private readonly string _smtpServer = Helper.GetEnvVar("MAIL_SMTP_SERVER");
+    private readonly int _smtpPort = int.Parse(Helper.GetEnvVar("MAIL_SMTP_PORT"));
+    private readonly string _smtpUsername = Helper.GetEnvVar("MAIL_SMTP_USERNAME");
+    private readonly string _smtpPassword = Helper.GetEnvVar("MAIL_SMTP_PASSWORD");
+    private readonly string _fromEmail = Helper.GetEnvVar("MAIL_FROM_EMAIL");
+    private readonly string _appName = configuration.GetValue<string>("Application:Name") ?? throw new ArgumentNullException(nameof(configuration));
+    private readonly string _appLogo = Helper.GetAppLogoUrl();
     private readonly string _templatePath = Path.Combine(Directory.GetCurrentDirectory(), "templates", "email");
 
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
         var message = new MimeMessage();
-        message.From.Add(MailboxAddress.Parse(_myEmail));
+        message.From.Add(MailboxAddress.Parse(_fromEmail));
         message.To.Add(MailboxAddress.Parse(email));
         message.Subject = subject;
 
@@ -41,8 +45,8 @@ public class EmailSender : IEmailSender<User>
     {
         var template = await File.ReadAllTextAsync(Path.Combine(_templatePath, "ConfirmEmail.html"));
         var htmlContent = template
-            .Replace("{{CompanyName}}", _appName)
-            .Replace("{{CompanyLogo}}", _appLogo)
+            .Replace("{{AppName}}", _appName)
+            .Replace("{{AppLogoUrl}}", _appLogo)
             .Replace("{{Email}}", user.Email)
             .Replace("{{ConfirmationLink}}", confirmationLink)
             .Replace("{{CurrentYear}}", DateTime.Now.Year.ToString());
@@ -55,8 +59,8 @@ public class EmailSender : IEmailSender<User>
     {
         var template = await File.ReadAllTextAsync(Path.Combine(_templatePath, "ResetPassword.html"));
         var htmlContent = template
-            .Replace("{{CompanyName}}", _appName)
-            .Replace("{{CompanyLogo}}", _appLogo)
+            .Replace("{{AppName}}", _appName)
+            .Replace("{{AppLogoUrl}}", _appLogo)
             .Replace("{{Email}}", user.Email)
             .Replace("{{ResetLink}}", resetLink)
             .Replace("{{CurrentYear}}", DateTime.Now.Year.ToString());
@@ -68,8 +72,8 @@ public class EmailSender : IEmailSender<User>
     {
         var template = await File.ReadAllTextAsync(Path.Combine(_templatePath, "ResetPasswordCode.html"));
         var htmlContent = template
-            .Replace("{{CompanyName}}", _appName)
-            .Replace("{{CompanyLogo}}", _appLogo)
+            .Replace("{{AppName}}", _appName)
+            .Replace("{{AppLogoUrl}}", _appLogo)
             .Replace("{{Email}}", user.Email)
             .Replace("{{ResetCode}}", resetCode)
             .Replace("{{CurrentYear}}", DateTime.Now.Year.ToString());

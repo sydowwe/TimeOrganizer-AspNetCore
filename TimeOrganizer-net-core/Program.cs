@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using TimeOrganizer_net_core;
 using TimeOrganizer_net_core.config;
-using TimeOrganizer_net_core.exception;
+using DotNetEnv;
 using TimeOrganizer_net_core.helper;
 
+Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+      options.UseNpgsql(Helper.GetDatabaseConnectionString())
   );
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -71,6 +72,7 @@ else
 // app.UseHttpsRedirection();
 app.UsePathBase(new PathString("/api"));
 app.UseRouting();
+app.UseStaticFiles();
 
 app.UseCors("AllowFrontend");
 

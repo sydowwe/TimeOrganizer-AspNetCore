@@ -46,6 +46,7 @@ public class UserController(IUserService userService) : ControllerBase
                 ServiceResultErrorType.InternalServerError => StatusCode(StatusCodes.Status500InternalServerError,
                     result.ErrorMessage),
                 ServiceResultErrorType.NotFound => StatusCode(StatusCodes.Status404NotFound, result.ErrorMessage),
+                ServiceResultErrorType.EmailNotConfirmed => StatusCode(StatusCodes.Status412PreconditionFailed, result.ErrorMessage),
                 ServiceResultErrorType.TwoFactorAuthRequired => StatusCode(StatusCodes.Status401Unauthorized,
                     result.ErrorMessage),
                 _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
@@ -71,9 +72,9 @@ public class UserController(IUserService userService) : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("confirm-email")]
-    public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string code)
+    public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
     {
-        var result = await userService.ConfirmEmail(email, code);
+        var result = await userService.ConfirmEmail(userId, token);
         if (!result.Succeeded)
         {
             return result.ErrorType switch

@@ -32,7 +32,7 @@
             display: inline-block;
             padding: 10px 20px;
             background-color: #8235ce;
-            color: white;
+            color: white!important;
             text-decoration: none;
             border-radius: 5px;
         }
@@ -47,9 +47,9 @@
 
 <div class="content">
     <div class="logo">
-        <img src="{{CompanyLogo}}" alt="{{CompanyName}} Logo">
+        <img src="{{AppLogoUrl}}" alt="{{AppName}} Logo">
     </div>
-    <h1>Welcome to {{CompanyName}}!</h1>
+    <h1>Welcome to {{AppName}}!</h1>
     <p>Hello {{Email}},</p>
     <p>We're excited to have you on board. To get started, please confirm your email address by clicking the button below:</p>
     <div style=" text-align: center">
@@ -59,7 +59,7 @@
     <p>If you didn't create an account with us, you can safely ignore this email.</p>
 </div>
 <div class="footer">
-    <p>&copy; {{CurrentYear}} {{CompanyName}}. All rights reserved.</p>
+    <p>&copy; {{CurrentYear}} {{AppName}}. All rights reserved.</p>
     <p>If you have any questions, please contact our support team.</p>
 </div>
 </body>

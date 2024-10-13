@@ -11,5 +11,5 @@ public enum ServiceResultErrorType
     Conflict,
     InternalServerError,
     TwoFactorAuthRequired,
-    InvalidTwoFactorAuthToken
+    InvalidTwoFactorAuthToken,
 }

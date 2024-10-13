@@ -22,26 +22,12 @@
         "LOGGING_LEVEL":"Information",
         "PORT":"8080",
         "PAGE_URL": "https://localhost:3000",
-        "APP_NAME": "TimeOrganizer",
 
-        "MAIL_SMTP_SERVER":"smtp.example.com",
-        "MAIL_SMTP_PORT":"587",
-        "MAIL_SMTP_USERNAME":"username",
-        "MAIL_SMTP_PASSWORD":"password",
-        "MAIL_ENABLE_SSL":"true",
-        "MAIL_TRUST_SERVER_CERTIFICATE":"true",
+        "MAIL_SMTP_SERVER":"smtp.gmail.com",
+        "MAIL_SMTP_PORT":"465",        
+        "MAIL_FROM_EMAIL":"info@adhdTimeOrganizer.com",
 
-        "OAUTH2_GOOGLE_CLIENT_ID":"your-client-id",
-        "OAUTH2_GOOGLE_CLIENT_SECRET":"your-client-secret",
-        "OAUTH2_GOOGLE_REDIRECT_URI":"http://localhost:5000/signin-google",
-
-        "RECAPTCHA_SECRET": "6LcoxRQqAAAAAHZYbzMgUYSW7tG3awHXik_wnDI4",
-        
-        "DB_DDL_TYPE":"Create",
-        "POSTGRES_USER":"jakub",
-        "POSTGRES_PASSWORD":"u9TwA2dUjhQS9sw%",
-        "DB_NAME":"ASP_NET_test",
-        "DB_HOST":"srv544364.hstgr.cloud"
+        "OAUTH2_GOOGLE_REDIRECT_URI":"http://localhost:5000/signin-google"
       }
     }    
   }

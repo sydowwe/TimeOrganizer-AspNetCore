@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -28,27 +27,12 @@ public class User : IdentityUser<long>
     public virtual ICollection<ToDoList> ToDoListList { get; set; } = new List<ToDoList>();
     public virtual ICollection<TaskUrgency> TaskUrgencyList { get; set; } = new List<TaskUrgency>();
     
-    
-    // [NotMapped]
-    // public override string? UserName
-    // {
-    //     get => Email;
-    //     set { } 
-    // }
-    //
-    // [NotMapped]
-    // public override string? NormalizedUserName
-    // {
-    //     get => NormalizedEmail;
-    //     set { } 
-    // }
 }
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-
         // Primary key
         builder.HasKey(u => u.Id);
 

@@ -18,7 +18,7 @@ public interface IUserService
     Task<ServiceResult<LoginResponse>> LoginUserAsync(LoginRequest loginRequest);
     Task<ServiceResult> ValidateTwoFactorAuthForLoginAsync(TwoFactorAuthLoginRequest request);
     Task Logout(HttpContext context);
-    Task<ServiceResult> ConfirmEmail(string? email, string? code);
+    Task<ServiceResult> ConfirmEmail(string? userId, string? token);
     Task<ServiceResult> ForgotPassword(string email);
     Task<ServiceResult> ResetPassword(ResetPasswordRequest request);
     Task<ServiceResult> ChangeEmailAsync(ChangeEmailRequest request);
@@ -37,12 +37,13 @@ public class UserService(
     SignInManager<User> signInManager,
     ILoggedUserService loggedUserService,
     IGoogleRecaptchaService googleRecaptchaService,
-    IEmailSender<User> emailSender,
+    IMyEmailSender<User> emailSender,
     ITaskUrgencyService taskUrgencyService,
     IRoutineTimePeriodService routineTimePeriodService,
     IRoleService roleService,
     IMapper mapper,
-    IUserSessionService userSession) : IUserService
+    IUserSessionService userSession,
+    IConfiguration configuration) : IUserService
 {
     #region Authorization
 
@@ -97,11 +98,6 @@ public class UserService(
             return ServiceResult<LoginResponse>.Error(userResult.ErrorType, userResult.ErrorMessage);
         }
         var user = userResult.Data;
-        
-        // if (!user.EmailConfirmed)
-        // {
-        //     return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.EmailNotConfirmed, "You need to confirm your email before first login");
-        // }
         var result = await signInManager.PasswordSignInAsync(user, loginRequest.Password,
             loginRequest.StayLoggedIn, true);
 
@@ -113,10 +109,15 @@ public class UserService(
             return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.UserLockedOut,
                 $"User locked out for {minutes}m {seconds}s");
         }
-
+        
         if (result.IsNotAllowed)
         {
             await userManager.AccessFailedAsync(user);
+            if (!user.EmailConfirmed)
+            {
+                return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.EmailNotConfirmed,
+                    "Confirm your email before logging in");
+            }
             return ServiceResult<LoginResponse>.Error(ServiceResultErrorType.AuthenticationFailed,
                 "Wrong email or password");
         }
@@ -195,13 +196,13 @@ public class UserService(
             ? ServiceResult.Successful()
             : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
     }
-    public async Task<ServiceResult> ConfirmEmail(string? id, string? token)
+    public async Task<ServiceResult> ConfirmEmail(string? userId, string? token)
     {
-        if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(token))
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
         {
             return ServiceResult.Error(ServiceResultErrorType.BadRequest, "UserId and Code must be supplied");
         }
-        var userResult = await GetByIdAsync(long.Parse(id));
+        var userResult = await GetByIdAsync(long.Parse(userId));
         if (!userResult.Succeeded)
         {
             return ServiceResult.Error(userResult.ErrorType, userResult.ErrorMessage);
@@ -431,9 +432,9 @@ public class UserService(
             ? ServiceResult<string>.Error(ServiceResultErrorType.NotFound, "totpAuthenticatorKey not found")
             : ServiceResult<string>.Successful(GenerateQrCode(totpAuthenticatorKey!, user.Email!));
     }
-    private static string GenerateQrCode(string secretKey, string userEmail)
+    private string GenerateQrCode(string secretKey, string userEmail)
     {
-        var appName = Helper.GetEnvVar("APP_NAME");
+        var appName = configuration.GetValue<string>("Application:Name") ?? throw new ArgumentNullException(nameof(configuration));
         var otpAuthUrl = $"otpauth://totp/{appName}:{userEmail}?secret={secretKey}&issuer={appName}&digits=6";
 
         using var qrGenerator = new QRCodeGenerator();

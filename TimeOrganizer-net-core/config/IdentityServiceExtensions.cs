@@ -15,6 +15,7 @@ public static class IdentityServiceExtensions
                 options.Password.RequiredLength = 8;
                 options.Password.RequiredUniqueChars = 4;
                 options.User.RequireUniqueEmail = true;
+                options.SignIn.RequireConfirmedEmail = true;
                 // options.Stores.ProtectPersonalData = true;
                 options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Email;
             })
