@@ -71,8 +71,25 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [AllowAnonymous]
+    [HttpGet("resend-confirmation-email")]
+    public async Task<IActionResult> ResendConfirmationEmail([FromQuery] long userId)
+    {
+        var result = await userService.ResendConfirmationEmail(userId);
+        if (!result.Succeeded)
+        {
+            return result.ErrorType switch
+            {
+                ServiceResultErrorType.BadRequest => BadRequest(result.ErrorMessage),
+                ServiceResultErrorType.NotFound => NotFound(result.ErrorMessage),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred")
+            };
+        }
+        return Ok();
+    }
+    
+    [AllowAnonymous]
     [HttpGet("confirm-email")]
-    public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
+    public async Task<IActionResult> ConfirmEmail([FromQuery] long userId, [FromQuery] string token)
     {
         var result = await userService.ConfirmEmail(userId, token);
         if (!result.Succeeded)
@@ -89,10 +106,10 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPassword([FromQuery] string email)
+    [HttpPost("forgotten-password")]
+    public async Task<IActionResult> ForgottenPassword([FromBody] EmailRequest request)
     {
-        var result = await userService.ForgotPassword(email);
+        var result = await userService.ForgottenPassword(request.Email);
         if (!result.Succeeded)
         {
             return result.ErrorType switch
@@ -130,7 +147,7 @@ public class UserController(IUserService userService) : ControllerBase
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
-        await userService.Logout(HttpContext);
+        await userService.Logout();
         return Ok();
     }
 

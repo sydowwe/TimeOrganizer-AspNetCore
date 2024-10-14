@@ -17,9 +17,10 @@ public interface IUserService
     Task<ServiceResult<TwoFactorAuthResponse>> RegisterUserAsync(RegistrationRequest registration);
     Task<ServiceResult<LoginResponse>> LoginUserAsync(LoginRequest loginRequest);
     Task<ServiceResult> ValidateTwoFactorAuthForLoginAsync(TwoFactorAuthLoginRequest request);
-    Task Logout(HttpContext context);
-    Task<ServiceResult> ConfirmEmail(string? userId, string? token);
-    Task<ServiceResult> ForgotPassword(string email);
+    Task Logout();
+    Task<ServiceResult> ResendConfirmationEmail(long? userId);
+    Task<ServiceResult> ConfirmEmail(long? userId, string? token);
+    Task<ServiceResult> ForgottenPassword(string email);
     Task<ServiceResult> ResetPassword(ResetPasswordRequest request);
     Task<ServiceResult> ChangeEmailAsync(ChangeEmailRequest request);
     Task<ServiceResult> ChangePasswordAsync(ChangePasswordRequest request);
@@ -77,9 +78,7 @@ public class UserService(
 
         await SetDefaultSettingsAsync(newUser.Id);
 
-        var token = await userManager.GenerateEmailConfirmationTokenAsync(newUser);
-        var confirmationLink = $"{Helper.GetEnvVar("PAGE_URL")}/confirm-email?userId={newUser.Id}&token={token}";
-        await emailSender.SendConfirmationLinkAsync(newUser, newUser.Email, confirmationLink);
+        await SendConfirmationEmail(newUser);
         return await SetUpTwoFactorAuth(newUser);
     }
 
@@ -151,7 +150,7 @@ public class UserService(
         return ServiceResult.Successful();
     }
 
-    public async Task Logout(HttpContext context)
+    public async Task Logout()
     {
         await signInManager.SignOutAsync();
     }
@@ -162,7 +161,7 @@ public class UserService(
 
     #region emailSenderNeeded
 
-    public async Task<ServiceResult> ForgotPassword(string email)
+    public async Task<ServiceResult> ForgottenPassword(string email)
     {
         var userResult = await GetByEmailAsync(email);
         if (!userResult.Succeeded)
@@ -177,32 +176,54 @@ public class UserService(
         }
 
         var token = await userManager.GeneratePasswordResetTokenAsync(userResult.Data);
-        
-        await emailSender.SendPasswordResetLinkAsync(user,email, $"{Helper.GetEnvVar("PAGE_URL")}/reset-password");
-        userSession.SetForPasswordReset(user.Id.ToString(), token);
+        var resetLink = new Uri($"{Helper.GetEnvVar("PAGE_URL")}/reset-password?userId={user.Id}&token={token}");
+        await emailSender.SendPasswordResetLinkAsync(user,email, resetLink.ToString());
         return ServiceResult.Successful();
     }
 
     public async Task<ServiceResult> ResetPassword(ResetPasswordRequest request)
     {
-        var sessionData = userSession.GetPasswordResetSession();
-        var userResult = await GetByIdAsync(long.Parse(sessionData.UserId));
+        var userResult = await GetByIdAsync(request.UserId);
         if (!userResult.Succeeded)
         {
             return ServiceResult.Error(userResult.ErrorType, userResult.ErrorMessage);
         }
-        var result = await userManager.ResetPasswordAsync(userResult.Data, sessionData.Token, request.NewPassword);
+        var result = await userManager.ResetPasswordAsync(userResult.Data, request.Token, request.NewPassword);
         return result.Succeeded
             ? ServiceResult.Successful()
             : ServiceResult.Error(ServiceResultErrorType.IdentityError, result.Errors.ToString());
     }
-    public async Task<ServiceResult> ConfirmEmail(string? userId, string? token)
+
+    private async Task SendConfirmationEmail(User user)
     {
-        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+        if (!user.EmailConfirmed)
         {
-            return ServiceResult.Error(ServiceResultErrorType.BadRequest, "UserId and Code must be supplied");
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            var confirmationLink = new Uri($"{Helper.GetEnvVar("PAGE_URL")}/confirm-email?userId={user.Id}&token={token}");
+            await emailSender.SendConfirmationLinkAsync(user, user.Email!, confirmationLink.ToString());
         }
-        var userResult = await GetByIdAsync(long.Parse(userId));
+    }
+    public async Task<ServiceResult> ResendConfirmationEmail(long? userId)
+    {
+        if (!userId.HasValue)
+        {
+            return ServiceResult.Error(ServiceResultErrorType.BadRequest, "UserId must be supplied");
+        }
+        var userResult = await GetByIdAsync(userId.Value);
+        if (!userResult.Succeeded)
+        {
+            return ServiceResult.Error(userResult.ErrorType, userResult.ErrorMessage);
+        }
+        await SendConfirmationEmail(userResult.Data);
+        return ServiceResult.Successful();
+    }
+    public async Task<ServiceResult> ConfirmEmail(long? userId, string? token)
+    {
+        if (!userId.HasValue || string.IsNullOrEmpty(token))
+        {
+            return ServiceResult.Error(ServiceResultErrorType.BadRequest, "UserId and token must be supplied");
+        }
+        var userResult = await GetByIdAsync(userId.Value);
         if (!userResult.Succeeded)
         {
             return ServiceResult.Error(userResult.ErrorType, userResult.ErrorMessage);
@@ -430,7 +451,7 @@ public class UserService(
         var totpAuthenticatorKey = await userManager.GetAuthenticatorKeyAsync(user);
         return string.IsNullOrEmpty(totpAuthenticatorKey)
             ? ServiceResult<string>.Error(ServiceResultErrorType.NotFound, "totpAuthenticatorKey not found")
-            : ServiceResult<string>.Successful(GenerateQrCode(totpAuthenticatorKey!, user.Email!));
+            : ServiceResult<string>.Successful(GenerateQrCode(totpAuthenticatorKey, user.Email!));
     }
     private string GenerateQrCode(string secretKey, string userEmail)
     {
